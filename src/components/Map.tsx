@@ -53,12 +53,12 @@ const Map: React.FC<MapProps> = ({ mapboxToken, onPinDrop, isInteractive, result
         new mapboxgl.Marker({ color: '#EF4444' }).setLngLat(result.guess).addTo(map.current);
         new mapboxgl.Marker({ color: '#22C55E' }).setLngLat(result.actual).addTo(map.current);
 
-        const geojson: mapboxgl.GeoJSONSourceRaw['data'] = {
-            type: 'FeatureCollection',
+        const geojson = {
+            type: 'FeatureCollection' as const,
             features: [{
-                type: 'Feature',
+                type: 'Feature' as const,
                 geometry: {
-                    type: 'LineString',
+                    type: 'LineString' as const,
                     coordinates: [
                         [result.guess.lng, result.guess.lat],
                         [result.actual.lng, result.actual.lat]
