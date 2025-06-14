@@ -66,7 +66,7 @@ const Map: React.FC<MapProps> = ({ mapboxToken, onPinDrop, isInteractive, result
                 },
                 properties: {}
             }]
-        };
+        } as const;
 
         if (map.current.getSource('line')) {
             (map.current.getSource('line') as mapboxgl.GeoJSONSource).setData(geojson);
