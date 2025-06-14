@@ -1,34 +1,27 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Map from '@/components/Map';
-import { CITIES, City } from '@/data/cities';
+import { CITIES } from '@/data/cities';
 import { getDistance, calculateScore } from '@/lib/geo';
-import { LngLat } from 'mapbox-gl';
 import { MapPin, Check, Star } from 'lucide-react';
 
-type GameState = 'SETUP' | 'START' | 'PLAYING' | 'RESULT' | 'END';
+type GameState = 'START' | 'PLAYING' | 'RESULT' | 'END';
+type LatLng = { lat: number; lng: number; };
 
 const Index = () => {
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [tempToken, setTempToken] = useState('');
-  const [gameState, setGameState] = useState<GameState>('SETUP');
+  // --- IMPORTANT ---
+  // PASTE YOUR GOOGLE MAPS API KEY HERE
+  const [googleMapsApiKey] = useState('YOUR_GOOGLE_MAPS_API_KEY_HERE');
+  
+  const [gameState, setGameState] = useState<GameState>('START');
   const [currentTurn, setCurrentTurn] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
   const [lastGuessResult, setLastGuessResult] = useState<{ distance: number, score: number } | null>(null);
-  const [selectedPin, setSelectedPin] = useState<LngLat | null>(null);
+  const [selectedPin, setSelectedPin] = useState<LatLng | null>(null);
   
   const cities = useMemo(() => CITIES, []);
   const currentCity = cities[currentTurn];
-
-  const handleTokenSubmit = () => {
-    if (tempToken) {
-      setMapboxToken(tempToken);
-      setGameState('START');
-    }
-  };
   
   const handleStartGame = () => {
     setCurrentTurn(0);
@@ -38,8 +31,8 @@ const Index = () => {
     setGameState('PLAYING');
   };
 
-  const handlePinDrop = (lngLat: LngLat) => {
-    setSelectedPin(lngLat);
+  const handlePinDrop = (latLng: LatLng) => {
+    setSelectedPin(latLng);
   };
 
   const handleConfirmGuess = () => {
@@ -61,29 +54,6 @@ const Index = () => {
       setGameState('END');
     }
   };
-
-  if (gameState === 'SETUP') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 animate-fade-in">
-        <Card className="w-full max-w-md text-center shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Welcome to City Pin!</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground">To play the game, you need a Mapbox public token. You can get one for free from the Mapbox website.</p>
-            <Input 
-              type="text" 
-              placeholder="Enter your Mapbox public token" 
-              value={tempToken} 
-              onChange={(e) => setTempToken(e.target.value)} 
-            />
-            <Button onClick={handleTokenSubmit} className="w-full" disabled={!tempToken}>Set Token & Start</Button>
-            <a href="https://account.mapbox.com/access-tokens" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">How to get a token?</a>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   if (gameState === 'START') {
     return (
@@ -115,10 +85,11 @@ const Index = () => {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       <Map 
-        mapboxToken={mapboxToken}
+        googleMapsApiKey={googleMapsApiKey}
         onPinDrop={handlePinDrop} 
         isInteractive={gameState === 'PLAYING'}
-        result={gameState === 'RESULT' ? { guess: selectedPin!, actual: new LngLat(currentCity.lng, currentCity.lat) } : undefined}
+        selectedPin={selectedPin}
+        result={gameState === 'RESULT' ? { guess: selectedPin!, actual: { lat: currentCity.lat, lng: currentCity.lng } } : undefined}
       />
 
       <div className="absolute top-4 left-4 right-4 animate-fade-in">

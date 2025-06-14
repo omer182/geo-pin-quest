@@ -1,105 +1,107 @@
 
-import React, { useRef, useEffect, useState } from 'react';
-import mapboxgl, { LngLat, Marker } from 'mapbox-gl';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { GoogleMap, useJsApiLoader, MarkerF, PolylineF } from '@react-google-maps/api';
+
+type LatLng = {
+  lat: number;
+  lng: number;
+};
 
 interface MapProps {
-  mapboxToken: string;
-  onPinDrop: (lngLat: LngLat) => void;
+  googleMapsApiKey: string;
+  onPinDrop: (latLng: LatLng) => void;
   isInteractive: boolean;
+  selectedPin: LatLng | null;
   result?: {
-    guess: LngLat;
-    actual: LngLat;
+    guess: LatLng;
+    actual: LatLng;
   }
 }
 
-const Map: React.FC<MapProps> = ({ mapboxToken, onPinDrop, isInteractive, result }) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [pin, setPin] = useState<Marker | null>(null);
+const containerStyle = {
+  width: '100%',
+  height: '100%',
+};
 
-  useEffect(() => {
-    mapboxgl.accessToken = mapboxToken;
-    if (map.current || !mapContainer.current) return;
+const center = {
+  lat: 20,
+  lng: 0
+};
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [0, 20],
-      zoom: 1.5,
-      projection: { name: 'globe' },
+const mapOptions = {
+    styles: [
+        { featureType: "administrative", elementType: "all", stylers: [{ visibility: "off" }] },
+        { featureType: "poi", stylers: [{ visibility: "off" }] },
+        { featureType: "road", stylers: [{ visibility: "off" }] },
+        { featureType: "transit", stylers: [{ visibility: "off" }] },
+        { featureType: "water", elementType: "labels.text", stylers: [{ visibility: "off" }] },
+    ],
+    disableDefaultUI: true,
+    zoomControl: true,
+    mapTypeId: 'satellite'
+};
+
+const Map: React.FC<MapProps> = ({ googleMapsApiKey, onPinDrop, isInteractive, selectedPin, result }) => {
+    const { isLoaded, loadError } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: googleMapsApiKey,
     });
+
+    const mapRef = useRef<google.maps.Map | null>(null);
+
+    const onLoad = useCallback((map: google.maps.Map) => {
+        mapRef.current = map;
+        map.setZoom(2);
+    }, []);
+
+    const onUnmount = useCallback(() => {
+        mapRef.current = null;
+    }, []);
+
+    const handleMapClick = (e: google.maps.MapMouseEvent) => {
+        if (!isInteractive || !e.latLng) return;
+        onPinDrop(e.latLng.toJSON());
+    };
     
-    map.current.on('style.load', () => {
-        map.current?.setFog({});
-    });
-
-    map.current.on('click', (e) => {
-      if (!isInteractive) return;
-      if (pin) pin.remove();
-      const newPin = new mapboxgl.Marker({ color: '#3B82F6' })
-        .setLngLat(e.lngLat)
-        .addTo(map.current!);
-      setPin(newPin);
-      onPinDrop(e.lngLat);
-    });
-
-    return () => map.current?.remove();
-  }, [mapboxToken]);
-
-  useEffect(() => {
-    if (map.current && result) {
-        if(pin) pin.remove();
-
-        new mapboxgl.Marker({ color: '#EF4444' }).setLngLat(result.guess).addTo(map.current);
-        new mapboxgl.Marker({ color: '#22C55E' }).setLngLat(result.actual).addTo(map.current);
-
-        const geojson = {
-            type: 'FeatureCollection' as const,
-            features: [{
-                type: 'Feature' as const,
-                geometry: {
-                    type: 'LineString' as const,
-                    coordinates: [
-                        [result.guess.lng, result.guess.lat],
-                        [result.actual.lng, result.actual.lat]
-                    ]
-                },
-                properties: {}
-            }]
-        };
-
-        if (map.current.getSource('line')) {
-            (map.current.getSource('line') as mapboxgl.GeoJSONSource).setData(geojson);
-        } else {
-            map.current.addSource('line', { type: 'geojson', data: geojson });
-            map.current.addLayer({
-                id: 'line-layer',
-                type: 'line',
-                source: 'line',
-                paint: { 'line-width': 2, 'line-color': '#1F2937' }
-            });
+    useEffect(() => {
+        if (result && mapRef.current && window.google) {
+            const bounds = new window.google.maps.LatLngBounds();
+            bounds.extend(result.guess);
+            bounds.extend(result.actual);
+            mapRef.current.fitBounds(bounds, 80);
         }
-        
-        const bounds = new mapboxgl.LngLatBounds();
-        bounds.extend(result.guess);
-        bounds.extend(result.actual);
-        map.current.fitBounds(bounds, { padding: 80, duration: 1000 });
-    }
-  }, [result, pin]);
-  
-  useEffect(() => {
-    if (isInteractive && pin) {
-        pin.remove();
-        setPin(null);
-    }
-    if (isInteractive && map.current?.getSource('line')) {
-        map.current.removeLayer('line-layer');
-        map.current.removeSource('line');
-    }
-  }, [isInteractive, pin]);
+    }, [result]);
 
+    if (loadError) {
+        return <div className="flex items-center justify-center h-full bg-red-100 text-red-700">Error loading map. Please check the API key.</div>;
+    }
 
-  return <div ref={mapContainer} className="absolute inset-0" />;
+    if (!isLoaded) return <div className="flex items-center justify-center h-full">Loading Map...</div>;
+    
+    return (
+        <div className="absolute inset-0">
+            <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={center}
+                zoom={2}
+                onLoad={onLoad}
+                onUnmount={onUnmount}
+                onClick={handleMapClick}
+                options={mapOptions}
+            >
+                {isInteractive && selectedPin && (
+                    <MarkerF position={selectedPin} />
+                )}
+                {result && (
+                    <>
+                        <MarkerF position={result.guess} label={{ text: "Your Guess", color: "white" }} />
+                        <MarkerF position={result.actual} label={{ text: "Actual Location", color: "white" }} />
+                        <PolylineF path={[result.guess, result.actual]} options={{ strokeColor: '#FFFFFF', strokeWeight: 2 }} />
+                    </>
+                )}
+            </GoogleMap>
+        </div>
+    );
 };
 
 export default Map;
