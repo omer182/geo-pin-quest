@@ -1,4 +1,3 @@
-
 export function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // Radius of the Earth in km
   const dLat = deg2rad(lat2 - lat1);
@@ -17,10 +16,57 @@ function deg2rad(deg: number): number {
 }
 
 export function calculateScore(distance: number): number {
-  if (distance <= 50) return 100;
-  if (distance <= 100) return 90;
-  if (distance <= 250) return 75;
-  if (distance <= 500) return 50;
-  if (distance <= 1000) return 30;
-  return 10;
+  // New scoring system: 0-1000 points based on proximity
+  if (distance <= 25) return 1000;      // Perfect guess: 1000 points
+  if (distance <= 50) return 900;       // Excellent: 900 points
+  if (distance <= 100) return 800;      // Very good: 800 points
+  if (distance <= 200) return 700;      // Good: 700 points
+  if (distance <= 400) return 600;      // Decent: 600 points
+  if (distance <= 600) return 500;      // Average: 500 points
+  if (distance <= 800) return 400;      // Below average: 400 points
+  if (distance <= 1000) return 300;     // Poor: 300 points
+  if (distance <= 1500) return 200;     // Bad: 200 points
+  if (distance <= 2000) return 100;     // Very bad: 100 points
+  return 50;                            // Terrible: 50 points
+}
+
+export function calculateLevel(totalScore: number): number {
+  return Math.floor(totalScore / 3000) + 1;
+}
+
+export function getPointsForNextLevel(totalScore: number): number {
+  const currentLevel = calculateLevel(totalScore);
+  return currentLevel * 3000;
+}
+
+export function getLevelProgress(totalScore: number): { 
+  currentLevel: number;
+  pointsInCurrentLevel: number;
+  pointsNeededForNext: number;
+  progressPercentage: number;
+} {
+  const currentLevel = calculateLevel(totalScore);
+  const pointsForCurrentLevel = (currentLevel - 1) * 3000;
+  const pointsForNextLevel = currentLevel * 3000;
+  const pointsInCurrentLevel = totalScore - pointsForCurrentLevel;
+  const pointsNeededForNext = pointsForNextLevel - totalScore;
+  const progressPercentage = (pointsInCurrentLevel / 3000) * 100;
+  
+  return {
+    currentLevel,
+    pointsInCurrentLevel,
+    pointsNeededForNext,
+    progressPercentage
+  };
+}
+
+// Check if player has enough points to advance to next level after 5 turns
+export function canAdvanceToNextLevel(totalScore: number, targetLevel: number): boolean {
+  const requiredPoints = targetLevel * 3000;
+  return totalScore >= requiredPoints;
+}
+
+// Calculate minimum points needed for a level (for game over check)
+export function getMinimumPointsForLevel(level: number): number {
+  return level * 3000;
 }

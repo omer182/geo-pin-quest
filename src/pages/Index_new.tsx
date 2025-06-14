@@ -15,6 +15,8 @@ type LatLng = { lat: number; lng: number; };
 const TURNS_PER_LEVEL = 5;
 
 const Index = () => {
+  const [googleMapsApiKey] = useState(import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyAQGrArZemALzWNsO-JWRiMF030oWt1aoY');
+  
   const [gameState, setGameState] = useState<GameState>('START');
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentTurn, setCurrentTurn] = useState(0);
@@ -27,11 +29,11 @@ const Index = () => {
   const cities = useMemo(() => getRandomCitiesFromLevel(currentLevel, TURNS_PER_LEVEL), [currentLevel]);
   const currentCity = cities[currentTurn];
   
-  // Calculate progress within current level (3000 points per level)
+  // Calculate progress within current level (300 points per level)
   const pointsNeededForCurrentLevel = getMinimumPointsForLevel(currentLevel);
   const pointsNeededForNextLevel = getMinimumPointsForLevel(currentLevel + 1);
-  const progressInLevel = Math.max(0, totalScore - pointsNeededForCurrentLevel + 3000);
-  const progressPercentage = Math.min(100, (progressInLevel / 3000) * 100);
+  const progressInLevel = Math.max(0, totalScore - pointsNeededForCurrentLevel + 300);
+  const progressPercentage = Math.min(100, (progressInLevel / 300) * 100);
   const pointsToNextLevel = Math.max(0, pointsNeededForNextLevel - totalScore);
 
   const resetMap = useCallback(() => {
@@ -112,9 +114,14 @@ const Index = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center p-4 animate-fade-up bg-cover bg-center" style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)), url(https://images.unsplash.com/photo-1572023023478-85750568d4a0?q=80&w=2070)'}}>
         <h1 className="text-6xl font-bold text-gray-800 drop-shadow-lg">Geo Pin Quest</h1>
-        <p className="text-xl text-gray-600 mt-2 mb-8">Test your geography knowledge</p>
+        <p className="text-xl text-gray-600 mt-2 mb-4">Test your geography knowledge across 5 challenging levels!</p>
+        <div className="text-sm text-gray-500 mb-8 max-w-md">
+          <p>• Each level has 5 cities to find</p>
+          <p>• Score 300+ points per level to advance</p>
+          <p>• Cities get harder as you progress</p>
+        </div>
         <Button onClick={handleStartGame} size="lg" className="text-lg">
-          Start Game
+          Start Level 1
           <MapPin className="ml-2 h-5 w-5" />
         </Button>
       </div>
@@ -145,85 +152,61 @@ const Index = () => {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       <Map 
-        googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY_HERE'}
+        googleMapsApiKey={googleMapsApiKey}
         onPinDrop={handlePinDrop} 
         isInteractive={gameState === 'PLAYING'}
         selectedPin={selectedPin}
-        result={gameState === 'RESULT' ? { 
-          guess: selectedPin!, 
-          actual: { lat: currentCity.lat, lng: currentCity.lng },
-          cityName: currentCity.name
-        } : undefined}
+        result={gameState === 'RESULT' ? { guess: selectedPin!, actual: { lat: currentCity.lat, lng: currentCity.lng } } : undefined}
       />
 
-      {/* Top navigation bar with points (left) and city name (center) */}
       <div className="absolute top-4 left-4 right-4 animate-fade-in">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          {/* Points display - left side */}
-          <Card className="shadow-lg">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-xs text-muted-foreground">Turn {currentTurn + 1}/{TURNS_PER_LEVEL}</p>
-                  <p className="text-sm font-semibold">{totalScore} pts</p>
+        <Card className="max-w-md mx-auto shadow-xl">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center mb-3">
+              <div>
+                <p className="text-sm text-muted-foreground">Turn {currentTurn + 1}/{TURNS_PER_LEVEL}</p>
+                <p className="text-lg font-semibold">{totalScore} pts</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Find this city:</p>
+                <p className="text-lg font-bold">{currentCity?.name}, {currentCity?.country}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-yellow-500" />
+                  <span className="text-sm font-medium">Level {currentLevel}</span>
                 </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-yellow-500" />
-                    <span className="text-xs font-medium">Level {currentLevel}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {pointsToNextLevel} to advance
-                  </span>
-                </div>
+                <span className="text-xs text-muted-foreground">
+                  {pointsToNextLevel} pts to advance
+                </span>
               </div>
-              
-              <div className="mt-2">
-                <Progress 
-                  value={progressPercentage} 
-                  className="h-1"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* City name - center */}
-          <Card className="shadow-lg bg-white/95 backdrop-blur-sm min-w-[260px]">
-            <CardContent className="p-3 text-center">
-              <div className="flex flex-col justify-between h-full">
-                <p className="text-xs text-muted-foreground mb-1">Find this city:</p>
-                <div>
-                  <p className="text-base font-bold text-gray-800">{currentCity?.name}</p>
-                  <p className="text-sm text-gray-600">{currentCity?.country}</p>
-                </div>
-              </div>
-              {/* Invisible progress bar for height matching */}
-              <div className="mt-2">
-                <div className="h-1 opacity-0"></div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Empty space for balance */}
-          <div className="w-[200px]"></div>
-        </div>
+              <Progress 
+                value={progressPercentage} 
+                className="h-2"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {gameState === 'PLAYING' && selectedPin && (
+      {gameState === 'PLAYING' && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs px-4 animate-fade-up">
-          <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 shadow-2xl">
+          <Button onClick={handleConfirmGuess} disabled={!selectedPin} className="w-full text-lg py-6 shadow-2xl">
             <Check className="mr-2 h-6 w-6" /> Confirm Guess
           </Button>
         </div>
       )}
 
       {gameState === 'RESULT' && lastGuessResult && (
-         <Card className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[55%] max-w-[220px] px-2 py-2 animate-fade-up shadow-2xl bg-white/95 backdrop-blur-sm">
+         <Card className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs px-4 py-4 animate-fade-up shadow-2xl">
            <div className="text-center">
-            <p className="text-xs font-semibold">You were {Math.round(lastGuessResult.distance)}km off!</p>
-            <p className="text-lg font-bold text-green-600 my-1">+{lastGuessResult.score} points</p>
+            <p className="text-lg font-bold">You were {Math.round(lastGuessResult.distance)}km off!</p>
+            <p className="text-2xl font-bold text-success my-2">+{lastGuessResult.score} points</p>
             
-            <Button onClick={handleNextTurn} className="w-full text-xs py-1.5 mt-1">
+            <Button onClick={handleNextTurn} className="w-full">
               {currentTurn === TURNS_PER_LEVEL - 1 ? 'Complete Level' : 'Next Turn'}
             </Button>
            </div>
