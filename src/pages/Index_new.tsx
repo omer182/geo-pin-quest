@@ -15,7 +15,7 @@ type LatLng = { lat: number; lng: number; };
 const TURNS_PER_LEVEL = 5;
 
 const Index = () => {
-  const [googleMapsApiKey] = useState(import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyAQGrArZemALzWNsO-JWRiMF030oWt1aoY');
+  const [googleMapsApiKey] = useState(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
   
   const [gameState, setGameState] = useState<GameState>('START');
   const [currentLevel, setCurrentLevel] = useState(1);
