@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { GoogleMap, useJsApiLoader, MarkerF, PolylineF } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, MarkerF, PolylineF, InfoWindowF } from '@react-google-maps/api';
 
 type LatLng = {
   lat: number;
@@ -76,7 +76,19 @@ const mapOptions = {
             east: 180   // Maximum longitude
         },
         strictBounds: false // Allow some panning beyond bounds
-    }
+    },
+    // Mobile optimizations
+    disableDoubleClickZoom: false, // Allow double tap to zoom on mobile
+    scrollwheel: true,
+    scaleControl: false,
+    rotateControl: false,
+    fullscreenControl: false,
+    streetViewControl: false,
+    keyboardShortcuts: false, // Disable to prevent conflicts with mobile keyboards
+    // iOS Safari specific optimizations
+    clickableIcons: false,
+    draggableCursor: 'default',
+    draggingCursor: 'default'
 };
 
 const Map: React.FC<MapProps> = ({ googleMapsApiKey, onPinDrop, isInteractive, selectedPin, result }) => {
@@ -90,7 +102,7 @@ const Map: React.FC<MapProps> = ({ googleMapsApiKey, onPinDrop, isInteractive, s
 
     const onLoad = useCallback((map: google.maps.Map) => {
         mapRef.current = map;
-        map.setZoom(2); // Start zoomed in 50% more than default (was 1, now 2)
+        map.setZoom(3); // Increased zoom from 2 to 3 for more detail
         map.setTilt(0); // Flat map perspective
     }, []);
 
@@ -135,9 +147,9 @@ const Map: React.FC<MapProps> = ({ googleMapsApiKey, onPinDrop, isInteractive, s
             }, 100);
             
         } else if (!result && mapRef.current) {
-            // Reset to default zoom view (50% more than original)
+            // Reset to higher zoom view for more detail
             mapRef.current.setCenter({ lat: 20, lng: 0 });
-            mapRef.current.setZoom(2);
+            mapRef.current.setZoom(3); // Increased from 2 to 3
             mapRef.current.setTilt(0);
         }
     }, [result]);
@@ -149,29 +161,65 @@ const Map: React.FC<MapProps> = ({ googleMapsApiKey, onPinDrop, isInteractive, s
     if (!isLoaded) return <div className="flex items-center justify-center h-full">Loading Map...</div>;
     
     return (
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 touch-manipulation">
             <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={center}
-                zoom={2} // Start at 50% more zoom than default (was 1, now 2)
+                zoom={3} // Increased default zoom from 2 to 3 for more detail
                 onLoad={onLoad}
                 onUnmount={onUnmount}
                 onClick={handleMapClick}
                 options={mapOptions}
+                mapContainerClassName="w-full h-full touch-manipulation"
             >
                 {isInteractive && selectedPin && (
                     <MarkerF position={selectedPin} />
                 )}
                 {result && (
                     <>
-                        <MarkerF position={result.guess} label={{ text: "Your Guess", color: "white" }} />
-                        <MarkerF position={result.actual} label={{ text: result.cityName || "Actual Location", color: "white" }} />
+                        <MarkerF 
+                            position={result.guess}
+                            label={{
+                                text: "Your Guess",
+                                color: "#ffffff",
+                                fontSize: "11px",
+                                fontWeight: "bold",
+                                className: "bg-blue-600 px-2 py-1 rounded-full shadow-lg"
+                            }}
+                            icon={{
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: 12,
+                                fillColor: '#3b82f6',
+                                fillOpacity: 1,
+                                strokeColor: '#ffffff',
+                                strokeWeight: 3
+                            }}
+                        />
+                        <MarkerF 
+                            position={result.actual}
+                            label={{
+                                text: result.cityName || "Actual Location",
+                                color: "#ffffff", 
+                                fontSize: "11px",
+                                fontWeight: "bold",
+                                className: "bg-green-600 px-2 py-1 rounded-full shadow-lg"
+                            }}
+                            icon={{
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: 12,
+                                fillColor: '#16a34a',
+                                fillOpacity: 1,
+                                strokeColor: '#ffffff', 
+                                strokeWeight: 3
+                            }}
+                        />
+                        
                         <PolylineF 
                             path={[result.guess, result.actual]} 
                             options={{ 
-                                strokeColor: '#FF0000', 
-                                strokeWeight: 3,
-                                strokeOpacity: 0.8 
+                                strokeColor: '#ef4444', 
+                                strokeWeight: 4,
+                                strokeOpacity: 0.9
                             }} 
                         />
                     </>

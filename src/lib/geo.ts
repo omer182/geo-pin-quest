@@ -62,11 +62,21 @@ export function getLevelProgress(totalScore: number): {
 
 // Check if player has enough points to advance to next level after 5 turns
 export function canAdvanceToNextLevel(totalScore: number, targetLevel: number): boolean {
-  const requiredPoints = targetLevel * 3000;
+  // Each level requires 3000 points to advance
+  // Level 1 -> Level 2: need 3000+ total points
+  // Level 2 -> Level 3: need 6000+ total points
+  // Level 3 -> Level 4: need 9000+ total points
+  // Level 4 -> Level 5: need 12000+ total points
+  const requiredPoints = (targetLevel - 1) * 3000;
   return totalScore >= requiredPoints;
 }
 
 // Calculate minimum points needed for a level (for game over check)
 export function getMinimumPointsForLevel(level: number): number {
-  return level * 3000;
+  // Level 1 starts at 0 points
+  // Level 2 starts at 3000 points
+  // Level 3 starts at 6000 points
+  // Level 4 starts at 9000 points
+  // Level 5 starts at 12000 points
+  return (level - 1) * 3000;
 }
