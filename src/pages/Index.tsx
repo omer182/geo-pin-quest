@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import Map from '@/components/Map';
 import GameOver from '@/components/GameOver';
 import LevelComplete from '@/components/LevelComplete';
+import { WorldMapBackground, Globe3D, FloatingElements } from '@/components/BackgroundElements';
 import { getRandomCitiesFromLevel } from '@/data/cities';
 import { getDistance, calculateScore, canAdvanceToNextLevel, getMinimumPointsForLevel } from '@/lib/geo';
 import { MapPin, Check, Star, Trophy } from 'lucide-react';
@@ -30,7 +31,7 @@ const Index = () => {
   // Calculate progress within current level (3000 points per level)
   const pointsNeededForCurrentLevel = getMinimumPointsForLevel(currentLevel);
   const pointsNeededForNextLevel = getMinimumPointsForLevel(currentLevel + 1);
-  const progressInLevel = Math.max(0, totalScore - pointsNeededForCurrentLevel + 3000);
+  const progressInLevel = Math.max(0, totalScore - pointsNeededForCurrentLevel);
   const progressPercentage = Math.min(100, (progressInLevel / 3000) * 100);
   const pointsToNextLevel = Math.max(0, pointsNeededForNextLevel - totalScore);
 
@@ -110,13 +111,61 @@ const Index = () => {
 
   if (gameState === 'START') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4 animate-fade-up bg-cover bg-center" style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)), url(https://images.unsplash.com/photo-1572023023478-85750568d4a0?q=80&w=2070)'}}>
-        <h1 className="text-6xl font-bold text-gray-800 drop-shadow-lg">Geo Pin Quest</h1>
-        <p className="text-xl text-gray-600 mt-2 mb-8">Test your geography knowledge</p>
-        <Button onClick={handleStartGame} size="lg" className="text-lg">
-          Start Game
-          <MapPin className="ml-2 h-5 w-5" />
-        </Button>
+      <div className="relative h-screen w-screen overflow-hidden">
+        {/* Beautiful animated background */}
+        <div className="game-start-background absolute inset-0">
+          <WorldMapBackground />
+          <Globe3D />
+        </div>
+        
+        {/* Dark gradient overlay for better text readability on dark background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50"></div>
+        
+        {/* Main content */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full">
+          <div className="text-center space-y-8 p-8 animate-fade-up">
+            <div className="space-y-4">
+              <h1 className="text-7xl font-bold text-white drop-shadow-2xl">
+                🌍 Geo Pin Quest
+              </h1>
+              <p className="text-2xl text-white/95 max-w-3xl mx-auto drop-shadow-lg font-medium">
+                Test your geography knowledge by pinning cities around the world!
+              </p>
+              <p className="text-lg text-white/80 max-w-2xl mx-auto drop-shadow">
+                Discover 250+ cities across 5 challenging difficulty levels
+              </p>
+            </div>
+            
+            <div className="space-y-6 animate-fade-in-delayed">
+              <Button 
+                onClick={handleStartGame} 
+                size="lg" 
+                className="btn-adventure text-xl px-12 py-6 font-semibold"
+              >
+                🎯 Start Adventure
+                <MapPin className="ml-3 h-6 w-6" />
+              </Button>
+              
+              <div className="flex flex-wrap justify-center gap-6 text-white/70 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🗺️</span>
+                  <span>Interactive Maps</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🏆</span>
+                  <span>Score & Levels</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🎯</span>
+                  <span>Precision Challenge</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Floating corner elements */}
+        <FloatingElements />
       </div>
     );
   }
@@ -156,11 +205,11 @@ const Index = () => {
         } : undefined}
       />
 
-      {/* Top navigation bar with points (left) and city name (center) */}
+      {/* Top navigation bar with points (left) and spacer (right) */}
       <div className="absolute top-4 left-4 right-4 animate-fade-in">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
+        <div className="flex items-start justify-between">
           {/* Points display - left side */}
-          <Card className="shadow-lg">
+          <Card className="shadow-lg bg-white/95 backdrop-blur-sm min-w-[260px]">
             <CardContent className="p-3">
               <div className="flex items-center gap-3">
                 <div>
@@ -173,7 +222,7 @@ const Index = () => {
                     <span className="text-xs font-medium">Level {currentLevel}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {pointsToNextLevel} to advance
+                    {pointsToNextLevel > 0 ? `${pointsToNextLevel} to advance` : 'Level Complete! 🎉'}
                   </span>
                 </div>
               </div>
@@ -187,46 +236,48 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* City name - center */}
-          <Card className="shadow-lg bg-white/95 backdrop-blur-sm min-w-[260px]">
-            <CardContent className="p-3 text-center">
-              <div className="flex flex-col justify-between h-full">
-                <p className="text-xs text-muted-foreground mb-1">Find this city:</p>
-                <div>
-                  <p className="text-base font-bold text-gray-800">{currentCity?.name}</p>
-                  <p className="text-sm text-gray-600">{currentCity?.country}</p>
-                </div>
-              </div>
-              {/* Invisible progress bar for height matching */}
-              <div className="mt-2">
-                <div className="h-1 opacity-0"></div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Empty space for balance */}
-          <div className="w-[200px]"></div>
+          {/* Spacer for layout balance */}
+          <div className="w-[260px]"></div>
         </div>
       </div>
 
+      {/* City name - center of screen aligned with bottom cards */}
+      <Card className="absolute top-4 left-1/2 -translate-x-1/2 w-[240px] shadow-lg bg-white/95 backdrop-blur-sm animate-fade-in">
+        <CardContent className="p-3 text-center">
+          <div className="flex flex-col justify-between h-full">
+            <p className="text-xs text-muted-foreground mb-1">Find this city:</p>
+            <div>
+              <p className="text-base font-bold text-gray-800">{currentCity?.name}</p>
+              <p className="text-sm text-gray-600">{currentCity?.country}</p>
+            </div>
+          </div>
+          {/* Invisible progress bar for height matching */}
+          <div className="mt-2">
+            <div className="h-1 opacity-0"></div>
+          </div>
+        </CardContent>
+      </Card>
+
       {gameState === 'PLAYING' && selectedPin && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs px-4 animate-fade-up">
-          <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 shadow-2xl">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[240px] animate-fade-up">
+          <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 px-8 shadow-2xl">
             <Check className="mr-2 h-6 w-6" /> Confirm Guess
           </Button>
         </div>
       )}
 
       {gameState === 'RESULT' && lastGuessResult && (
-         <Card className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[55%] max-w-[220px] px-2 py-2 animate-fade-up shadow-2xl bg-white/95 backdrop-blur-sm">
-           <div className="text-center">
-            <p className="text-xs font-semibold">You were {Math.round(lastGuessResult.distance)}km off!</p>
-            <p className="text-lg font-bold text-green-600 my-1">+{lastGuessResult.score} points</p>
-            
-            <Button onClick={handleNextTurn} className="w-full text-xs py-1.5 mt-1">
-              {currentTurn === TURNS_PER_LEVEL - 1 ? 'Complete Level' : 'Next Turn'}
-            </Button>
-           </div>
+         <Card className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[240px] animate-fade-up shadow-2xl bg-white/95 backdrop-blur-sm">
+           <CardContent className="p-3">
+             <div className="text-center">
+              <p className="text-xs font-semibold">You were {Math.round(lastGuessResult.distance)}km off!</p>
+              <p className="text-lg font-bold text-green-600 my-1">+{lastGuessResult.score} points</p>
+              
+              <Button onClick={handleNextTurn} className="w-full text-xs py-1.5 mt-1">
+                {currentTurn === TURNS_PER_LEVEL - 1 ? 'Complete Level' : 'Next Turn'}
+              </Button>
+             </div>
+           </CardContent>
          </Card>
       )}
     </div>
