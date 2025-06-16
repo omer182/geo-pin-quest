@@ -1,14 +1,17 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "geo-pin-quest",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docker:build": "docker build -t geo-pin-quest .",
+    "docker:run": "docker run -p 3000:3000 --name geo-pin-quest-container geo-pin-quest",
+    "docker:stop": "docker stop geo-pin-quest-container && docker rm geo-pin-quest-container"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

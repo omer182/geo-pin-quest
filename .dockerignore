@@ -1,0 +1,68 @@
+# Docker ignore file for Geo Pin Quest
+# This file specifies which files and directories should be ignored when building the Docker image
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Production build
+dist/
+
+# Environment files (will be handled separately)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# CI/CD
+.github/
+
+# Documentation and development files
+README.md
+docs/
+*.md
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Temporary files
+tmp/
+temp/
