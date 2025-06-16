@@ -4,6 +4,10 @@ FROM --platform=linux/arm64 node:20-alpine AS build
 # Set working directory
 WORKDIR /app
 
+# Accept API key as build argument
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci

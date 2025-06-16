@@ -45,6 +45,8 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VITE_GOOGLE_MAPS_API_KEY=test_key_for_build_validation
 
       - name: Generate PR summary
         run: |
