@@ -43,10 +43,10 @@ jobs:
           context: .
           platforms: linux/amd64
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            VITE_GOOGLE_MAPS_API_KEY=test_key_for_build_validation
+          cache-from: |
+            type=gha
+            type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
+          cache-to: type=gha,mode=max_validation
 
       - name: Generate PR summary
         run: |
