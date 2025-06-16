@@ -12,8 +12,8 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Install serve globally for production serving
-RUN npm install -g serve
+# Install serve globally and curl for health checks
+RUN npm install -g serve && apk add --no-cache curl
 
 # Expose port 3000 (serves the built React app)
 EXPOSE 3000
