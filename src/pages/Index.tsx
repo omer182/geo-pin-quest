@@ -241,33 +241,41 @@ const Index = () => {
         </div>
       </div>
 
-      {/* City name - center of screen aligned with bottom cards */}
-      <Card className="absolute top-4 left-1/2 -translate-x-1/2 w-[240px] shadow-lg bg-white/95 backdrop-blur-sm animate-fade-in">
-        <CardContent className="p-3 text-center">
-          <div className="flex flex-col justify-between h-full">
-            <p className="text-xs text-muted-foreground mb-1">Find this city:</p>
-            <div>
-              <p className="text-base font-bold text-gray-800">{currentCity?.name}</p>
-              <p className="text-sm text-gray-600">{currentCity?.country}</p>
-            </div>
-          </div>
-          {/* Invisible progress bar for height matching */}
-          <div className="mt-2">
-            <div className="h-1 opacity-0"></div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* City name - center of screen, positioned independently */}
+      <div className="absolute top-4 left-0 right-0 pointer-events-none animate-fade-in">
+        <div className="flex justify-center">
+          <Card className="min-w-[260px] shadow-lg bg-blue-50/95 backdrop-blur-sm pointer-events-auto">
+            <CardContent className="p-3">
+              <div className="flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Locate this city:</p>
+                  <p className="text-sm font-semibold">{currentCity?.name}, {currentCity?.country}</p>
+                </div>
+              </div>
+              
+              <div className="mt-2">
+                <Progress 
+                  value={0} 
+                  className="h-1 opacity-0"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {gameState === 'PLAYING' && selectedPin && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[240px] animate-fade-up">
-          <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 px-8 shadow-2xl">
-            <Check className="mr-2 h-6 w-6" /> Confirm Guess
-          </Button>
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-fade-up">
+          <div className="min-w-[260px]">
+            <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 px-8 shadow-2xl">
+              <Check className="mr-2 h-6 w-6" /> Confirm Guess
+            </Button>
+          </div>
         </div>
       )}
 
       {gameState === 'RESULT' && lastGuessResult && (
-         <Card className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[240px] animate-fade-up shadow-2xl bg-white/95 backdrop-blur-sm">
+         <Card className="absolute bottom-4 left-1/2 -translate-x-1/2 min-w-[260px] animate-fade-up shadow-2xl bg-white/95 backdrop-blur-sm">
            <CardContent className="p-3">
              <div className="text-center">
               <p className="text-xs font-semibold">You were {Math.round(lastGuessResult.distance)}km off!</p>
