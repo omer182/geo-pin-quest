@@ -5,10 +5,12 @@
 **Geo Pin Quest** is an interactive geography quiz game built as a React web application featuring a level-based endless progression system. The game challenges players to guess the locations of famous cities around the world by dropping pins on a clean, minimalist Google Maps interface. Players advance through levels by meeting point thresholds, creating an engaging educational experience that tests geographical knowledge with increasing difficulty.
 
 **Recent Major Updates:**
-- **Enhanced Map Experience**: Simplified map styling showing only country boundaries with clean land/water colors
-- **Intelligent Zoom Behavior**: Smart bounds-based zoom that optimally displays both guess and answer locations
-- **Streamlined UI**: Compact result card design that doesn't obstruct the map view
-- **Performance Optimizations**: Improved map rendering and interaction responsiveness
+- **Enhanced Map Experience**: Simplified map styling showing only country boundaries with clean land/water colors and vibrant country coloring system
+- **Intelligent Zoom Behavior**: Smart bounds-based zoom that optimally displays both guess and answer locations with restricted zoom-out limits
+- **Streamlined UI Layout**: Compact card design with points card (left) and city card (right) in top navigation
+- **Dynamic City Card Animation**: Smooth transition animation where city card starts centered and moves to top-right corner
+- **Performance Optimizations**: Improved map rendering, interaction responsiveness, and level progression balance
+- **Visual Enhancements**: Consistent card styling with matching opacity and fixed dimensions for stable animations
 
 ## Key Libraries
 
@@ -27,8 +29,9 @@
 
 ### Maps & Geolocation
 - **@react-google-maps/api 2.20.6** - Google Maps integration for React with geometry library
-- **Custom Map Styling** - Simplified visual design showing only country boundaries
-- **Intelligent Zoom System** - Dynamic bounds-based zoom with distance-aware padding
+- **Vibrant Country Coloring** - 50+ unique vibrant colors for each country using hash-based assignment
+- **Custom Map Styling** - Simplified visual design showing only country boundaries with white borders
+- **Intelligent Zoom System** - Dynamic bounds-based zoom with distance-aware padding and restricted zoom-out limits (minZoom: 2)
 - **@types/mapbox-gl** - Type definitions (legacy, not actively used)
 
 ### State Management & Data Fetching
@@ -52,7 +55,7 @@
 ├── public/              # Static assets (favicon, robots.txt)
 ├── src/
 │   ├── components/      # Reusable React components
-│   │   ├── Map.tsx      # Enhanced Google Maps with clean styling & smart zoom
+│   │   ├── Map.tsx      # Enhanced Google Maps with vibrant country colors & smart zoom
 │   │   ├── GameOver.tsx # Game over modal component
 │   │   ├── LevelComplete.tsx # Level completion modal component
 │   │   └── ui/          # shadcn/ui component library
@@ -62,10 +65,10 @@
 │   │   ├── use-mobile.tsx   # Mobile device detection
 │   │   └── use-toast.ts     # Toast notification management
 │   ├── lib/             # Utility functions and helpers
-│   │   ├── geo.ts       # Geographical calculations (distance, 0-1000 point scoring)
+│   │   ├── geo.ts       # Geographical calculations (distance, 0-1000 point scoring, 2000-point level system)
 │   │   └── utils.ts     # General utility functions
 │   ├── pages/           # Page components
-│   │   ├── Index.tsx    # Main game page with Google Maps
+│   │   ├── Index.tsx    # Main game page with animated UI cards and Google Maps
 │   │   └── NotFound.tsx # 404 error page
 │   ├── App.tsx          # Root application component
 │   └── main.tsx         # Application entry point
@@ -148,15 +151,24 @@ The project uses Vite's built-in environment variable system with proper `.env` 
 1. **Critical**: Set `VITE_GOOGLE_MAPS_API_KEY` environment variable with a valid Google Maps API key
 2. **APIs Required**: Enable Google Maps JavaScript API and Geometry Library in Google Cloud Console
 3. **Billing**: Google Maps API requires billing account setup
-4. **Enhanced Styling**: Clean map design with only country boundaries visible for focused geography learning
-5. **Smart Zoom**: Automatic bounds-based zoom that adapts to guess-answer distance relationships
+4. **Vibrant Map Design**: Colorful country visualization with 50+ unique colors and clean white borders for enhanced geography learning
+5. **Restricted Zoom**: Minimum zoom level (minZoom: 2) prevents excessive zoom-out to maintain geography challenge
+6. **Smart Zoom**: Automatic bounds-based zoom that adapts to guess-answer distance relationships
 
 ### Map Features & Optimizations
-- **Simplified Visual Design**: Only country boundaries shown with clean land (#f5f5dc) and water (#4682b4) colors
-- **Intelligent Zoom Behavior**: Dynamic padding based on distance between guess and answer points
-- **Performance Optimized**: Geometry library integration for accurate distance calculations
-- **UI Integration**: Compact result card (55% width) positioned to not obstruct map view
-- **Accessibility**: High contrast country borders (#333333) for better visibility
+- **Vibrant Country Coloring**: 50+ unique vibrant colors assigned to countries using hash-based algorithm for visual distinction
+- **Enhanced Visual Design**: Clean country boundaries with white borders (2px) and 85% color opacity for optimal visibility
+- **Intelligent Zoom Behavior**: Dynamic padding based on distance between guess and answer points with zoom restrictions
+- **Performance Optimized**: Geometry library integration for accurate distance calculations and GeoJSON data layer for country colors
+- **UI Integration**: Compact card system (182px width) positioned to not obstruct map view
+- **Accessibility**: High contrast borders and vibrant colors for better geographical recognition
+
+### UI/UX Features & Animations
+- **Dynamic Card Layout**: Points card (top-left) and city card (top-right) with consistent 182px width (30% smaller than original)
+- **City Card Animation**: Smooth transition where city card starts centered at 130% scale, then moves to top-right corner over 2 seconds
+- **Fixed Card Heights**: Consistent 72px height for city card to prevent layout shifts with long city names
+- **Visual Consistency**: Matching opacity levels (bg-white/95 and bg-blue-50/95) for cohesive design
+- **Responsive Elements**: All bottom cards (confirm button and result card) centered and width-matched to top cards
 
 ### Development Setup
 1. Uses port 8080 by default (configured in `vite.config.ts`)
@@ -165,16 +177,20 @@ The project uses Vite's built-in environment variable system with proper `.env` 
 4. Requires valid Google Maps API key for map functionality
 
 ### Game Logic & Architecture
-- **Level System**: 5 turns per level, 3000 points needed to advance
-- **Scoring Algorithm**: 0-1000 points per guess based on distance accuracy
-- **City Database**: 250+ cities across 5 difficulty levels with increasing challenge
-- **Game Flow**: Level progression with GameOver and LevelComplete modals
+- **Level System**: 5 turns per level, 2000 points needed to advance (reduced from 3000 for better accessibility)
+- **Scoring Algorithm**: 0-1000 points per guess based on distance accuracy with enhanced precision rewards
+- **City Database**: 250+ cities across 5 difficulty levels with increasing geographical challenge
+- **Game Flow**: Level progression with GameOver and LevelComplete modals and smooth state transitions
 - **Enhanced Map Interactions**: 
-  - Click-based pin placement with visual feedback
-  - Smart zoom to optimal view of guess-answer relationship
-  - Clean map reset after each turn
-  - Distance-aware zoom padding for better user experience
-- **Responsive Design**: Compact result card that adapts to different screen sizes
+  - Click-based pin placement with visual feedback and restricted zoom controls
+  - Smart zoom to optimal view of guess-answer relationship with distance-aware padding
+  - Clean map reset after each turn with vibrant country color system
+  - Zoom restrictions (minZoom: 2) to maintain geographical challenge
+- **Dynamic UI System**: 
+  - Animated city card transitions from center (130% scale) to top-right corner over 2 seconds
+  - Consistent card layout with 182px width and fixed heights for stable animations
+  - Perfectly aligned card system with points (left) and city (right) in top navigation
+  - Responsive bottom cards (confirm/result) that match top card dimensions and centering
 
 ## TODOs
 
@@ -211,8 +227,12 @@ The project uses Vite's built-in environment variable system with proper `.env` 
 5. **Map Optimization**: Already implemented with geometry library and optimized zoom behavior
 
 ### Recent Improvements Completed ✅
-- **Enhanced Map Styling**: Removed all unnecessary visual elements, showing only clean country boundaries
-- **Smart Zoom System**: Implemented distance-aware zoom with optimal padding for guess-answer visualization
-- **Compact UI Design**: Reduced result card size by 45% with better positioning
-- **Performance Optimizations**: Added geometry library for accurate distance calculations
-- **Clean Visual Design**: Implemented minimalist color scheme for focused geography learning
+- **Vibrant Country Coloring System**: Implemented 50+ unique colors for countries with hash-based assignment and GeoJSON data layer
+- **Enhanced Map Styling**: Clean white borders (2px) with 85% color opacity for optimal country distinction
+- **Optimized Level Progression**: Reduced advancement requirement from 3000 to 2000 points per level for better accessibility
+- **Dynamic UI Card System**: Complete redesign with points card (left) and city card (right) in 182px width format
+- **Smooth City Card Animation**: Implemented 2-second transition from center (130% scale) to top-right corner with fixed height (72px)
+- **Improved Zoom Controls**: Added minimum zoom restriction (minZoom: 2) to maintain geographical challenge
+- **Visual Consistency**: Standardized card opacity, dimensions, and positioning for cohesive user experience
+- **Performance Optimizations**: Enhanced geometry library integration and smooth animation system
+- **Browser Title & Favicon**: Updated to "Geo Pin Quest" with globe emoji (🌍) SVG favicon for better branding

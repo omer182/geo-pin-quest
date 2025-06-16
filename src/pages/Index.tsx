@@ -273,12 +273,12 @@ const Index = () => {
             : 'scale(1)'
         }}
       >
-        <Card className="shadow-2xl bg-blue-50/95 backdrop-blur-sm w-[182px]">
-          <CardContent className="p-3">
-            <div className="flex items-center justify-center">
+        <Card className="shadow-2xl bg-blue-50/95 backdrop-blur-sm w-[182px] h-[72px]">
+          <CardContent className="p-3 h-full flex flex-col justify-center">
+            <div className="flex items-center justify-center flex-1">
               <div className="text-center">
                 <p className="text-xs text-muted-foreground mb-1">Locate this city:</p>
-                <p className="text-sm font-semibold">{currentCity?.name}, {currentCity?.country}</p>
+                <p className="text-sm font-semibold leading-tight overflow-hidden text-ellipsis">{currentCity?.name}, {currentCity?.country}</p>
               </div>
             </div>
             
