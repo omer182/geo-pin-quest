@@ -28,11 +28,11 @@ const Index = () => {
   const cities = useMemo(() => getRandomCitiesFromLevel(currentLevel, TURNS_PER_LEVEL), [currentLevel]);
   const currentCity = cities[currentTurn];
   
-  // Calculate progress within current level (3000 points per level)
+  // Calculate progress within current level (2000 points per level)
   const pointsNeededForCurrentLevel = getMinimumPointsForLevel(currentLevel);
   const pointsNeededForNextLevel = getMinimumPointsForLevel(currentLevel + 1);
   const progressInLevel = Math.max(0, totalScore - pointsNeededForCurrentLevel);
-  const progressPercentage = Math.min(100, (progressInLevel / 3000) * 100);
+  const progressPercentage = Math.min(100, (progressInLevel / 2000) * 100);
   const pointsToNextLevel = Math.max(0, pointsNeededForNextLevel - totalScore);
 
   const resetMap = useCallback(() => {
@@ -205,11 +205,11 @@ const Index = () => {
         } : undefined}
       />
 
-      {/* Top navigation bar with points (left) and spacer (right) */}
+      {/* Top navigation bar with points (left) and city card (right) */}
       <div className="absolute top-4 left-4 right-4 animate-fade-in">
         <div className="flex items-start justify-between">
           {/* Points display - left side */}
-          <Card className="shadow-lg bg-white/95 backdrop-blur-sm min-w-[260px]">
+          <Card className="shadow-lg bg-white/95 backdrop-blur-sm min-w-[182px]">
             <CardContent className="p-3">
               <div className="flex items-center gap-3">
                 <div>
@@ -236,15 +236,8 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* Spacer for layout balance */}
-          <div className="w-[260px]"></div>
-        </div>
-      </div>
-
-      {/* City name - center of screen, positioned independently */}
-      <div className="absolute top-4 left-0 right-0 pointer-events-none animate-fade-in">
-        <div className="flex justify-center">
-          <Card className="min-w-[260px] shadow-lg bg-blue-50/95 backdrop-blur-sm pointer-events-auto">
+          {/* City card - right side */}
+          <Card className="min-w-[182px] shadow-lg bg-blue-50/95 backdrop-blur-sm">
             <CardContent className="p-3">
               <div className="flex items-center justify-center">
                 <div className="text-center">
@@ -267,7 +260,7 @@ const Index = () => {
       {gameState === 'PLAYING' && selectedPin && (
         <div className="absolute bottom-4 left-0 right-0 animate-fade-up">
           <div className="flex justify-center">
-            <div className="min-w-[260px]">
+            <div className="min-w-[182px]">
               <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 px-8 shadow-2xl">
                 <Check className="mr-2 h-6 w-6" /> Confirm Guess
               </Button>
@@ -279,7 +272,7 @@ const Index = () => {
       {gameState === 'RESULT' && lastGuessResult && (
         <div className="absolute bottom-4 left-0 right-0 animate-fade-up">
           <div className="flex justify-center">
-            <Card className="min-w-[260px] shadow-2xl bg-white/95 backdrop-blur-sm">
+            <Card className="min-w-[182px] shadow-2xl bg-white/95 backdrop-blur-sm">
               <CardContent className="p-3">
                 <div className="text-center">
                  <p className="text-xs font-semibold">You were {Math.round(lastGuessResult.distance)}km off!</p>

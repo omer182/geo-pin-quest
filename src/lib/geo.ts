@@ -31,12 +31,12 @@ export function calculateScore(distance: number): number {
 }
 
 export function calculateLevel(totalScore: number): number {
-  return Math.floor(totalScore / 3000) + 1;
+  return Math.floor(totalScore / 2000) + 1;
 }
 
 export function getPointsForNextLevel(totalScore: number): number {
   const currentLevel = calculateLevel(totalScore);
-  return currentLevel * 3000;
+  return currentLevel * 2000;
 }
 
 export function getLevelProgress(totalScore: number): { 
@@ -46,11 +46,11 @@ export function getLevelProgress(totalScore: number): {
   progressPercentage: number;
 } {
   const currentLevel = calculateLevel(totalScore);
-  const pointsForCurrentLevel = (currentLevel - 1) * 3000;
-  const pointsForNextLevel = currentLevel * 3000;
+  const pointsForCurrentLevel = (currentLevel - 1) * 2000;
+  const pointsForNextLevel = currentLevel * 2000;
   const pointsInCurrentLevel = totalScore - pointsForCurrentLevel;
   const pointsNeededForNext = pointsForNextLevel - totalScore;
-  const progressPercentage = (pointsInCurrentLevel / 3000) * 100;
+  const progressPercentage = (pointsInCurrentLevel / 2000) * 100;
   
   return {
     currentLevel,
@@ -62,21 +62,21 @@ export function getLevelProgress(totalScore: number): {
 
 // Check if player has enough points to advance to next level after 5 turns
 export function canAdvanceToNextLevel(totalScore: number, targetLevel: number): boolean {
-  // Each level requires 3000 points to advance
-  // Level 1 -> Level 2: need 3000+ total points
-  // Level 2 -> Level 3: need 6000+ total points
-  // Level 3 -> Level 4: need 9000+ total points
-  // Level 4 -> Level 5: need 12000+ total points
-  const requiredPoints = (targetLevel - 1) * 3000;
+  // Each level requires 2000 points to advance
+  // Level 1 -> Level 2: need 2000+ total points
+  // Level 2 -> Level 3: need 4000+ total points
+  // Level 3 -> Level 4: need 6000+ total points
+  // Level 4 -> Level 5: need 8000+ total points
+  const requiredPoints = (targetLevel - 1) * 2000;
   return totalScore >= requiredPoints;
 }
 
 // Calculate minimum points needed for a level (for game over check)
 export function getMinimumPointsForLevel(level: number): number {
   // Level 1 starts at 0 points
-  // Level 2 starts at 3000 points
-  // Level 3 starts at 6000 points
-  // Level 4 starts at 9000 points
-  // Level 5 starts at 12000 points
-  return (level - 1) * 3000;
+  // Level 2 starts at 2000 points
+  // Level 3 starts at 4000 points
+  // Level 4 starts at 6000 points
+  // Level 5 starts at 8000 points
+  return (level - 1) * 2000;
 }
