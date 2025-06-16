@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -24,6 +24,7 @@ const Index = () => {
   const [lastGuessResult, setLastGuessResult] = useState<{ distance: number, score: number } | null>(null);
   const [selectedPin, setSelectedPin] = useState<LatLng | null>(null);
   const [leveledUp, setLeveledUp] = useState(false);
+  const [cityCardCentered, setCityCardCentered] = useState(true);
   
   const cities = useMemo(() => getRandomCitiesFromLevel(currentLevel, TURNS_PER_LEVEL), [currentLevel]);
   const currentCity = cities[currentTurn];
@@ -39,6 +40,21 @@ const Index = () => {
     setSelectedPin(null);
   }, []);
 
+  // Handle city card transition animation
+  useEffect(() => {
+    if (gameState === 'PLAYING') {
+      // Start with card centered
+      setCityCardCentered(true);
+      
+      // After 2 seconds, transition to top-right position
+      const timer = setTimeout(() => {
+        setCityCardCentered(false);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentTurn, gameState]);
+
   const handleStartGame = () => {
     setCurrentLevel(1);
     setCurrentTurn(0);
@@ -47,6 +63,7 @@ const Index = () => {
     setLastGuessResult(null);
     setSelectedPin(null);
     setLeveledUp(false);
+    setCityCardCentered(true);
     setGameState('PLAYING');
   };
 
@@ -69,6 +86,7 @@ const Index = () => {
     resetMap();
     setLastGuessResult(null);
     setLeveledUp(false);
+    setCityCardCentered(true);
     
     if (currentTurn < TURNS_PER_LEVEL - 1) {
       // Continue to next turn in current level
@@ -98,6 +116,7 @@ const Index = () => {
       setLevelScore(0);
       setSelectedPin(null);
       setLastGuessResult(null);
+      setCityCardCentered(true);
       setGameState('PLAYING');
     } else {
       // No more levels, show victory screen
@@ -205,7 +224,7 @@ const Index = () => {
         } : undefined}
       />
 
-      {/* Top navigation bar with points (left) and city card (right) */}
+      {/* Top navigation bar with points (left) and city card placeholder (right) */}
       <div className="absolute top-4 left-4 right-4 animate-fade-in">
         <div className="flex items-start justify-between">
           {/* Points display - left side */}
@@ -236,25 +255,41 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* City card - right side */}
-          <Card className="min-w-[182px] shadow-lg bg-blue-50/95 backdrop-blur-sm">
-            <CardContent className="p-3">
-              <div className="flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Locate this city:</p>
-                  <p className="text-sm font-semibold">{currentCity?.name}, {currentCity?.country}</p>
-                </div>
-              </div>
-              
-              <div className="mt-2">
-                <Progress 
-                  value={0} 
-                  className="h-1 opacity-0"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {/* Empty placeholder to maintain layout */}
+          <div className="min-w-[182px]"></div>
         </div>
+      </div>
+
+      {/* City card with smooth transition animation */}
+      <div 
+        className={`fixed z-30 transition-all duration-1000 ease-out ${
+          cityCardCentered 
+            ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' 
+            : 'top-4 right-4'
+        }`}
+        style={{
+          transform: cityCardCentered 
+            ? 'translate(-50%, -50%) scale(1.3)' 
+            : 'scale(1)'
+        }}
+      >
+        <Card className="shadow-2xl bg-blue-50/95 backdrop-blur-sm w-[182px]">
+          <CardContent className="p-3">
+            <div className="flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Locate this city:</p>
+                <p className="text-sm font-semibold">{currentCity?.name}, {currentCity?.country}</p>
+              </div>
+            </div>
+            
+            <div className="mt-2">
+              <Progress 
+                value={0} 
+                className="h-1 opacity-0"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {gameState === 'PLAYING' && selectedPin && (
