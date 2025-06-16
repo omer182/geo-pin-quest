@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "docker:build": "docker build -t geo-pin-quest .",
-    "docker:run": "docker run -p 3000:3000 --name geo-pin-quest-container geo-pin-quest",
+    "docker:run": "docker run -p 4001:4001 --name geo-pin-quest-container geo-pin-quest",
     "docker:stop": "docker stop geo-pin-quest-container && docker rm geo-pin-quest-container"
   },
   "dependencies": {

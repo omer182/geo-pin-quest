@@ -39,15 +39,15 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
     echo 'else' >> /app/start.sh && \
     echo '  echo "Warning: VITE_GOOGLE_MAPS_API_KEY not set"' >> /app/start.sh && \
     echo 'fi' >> /app/start.sh && \
-    echo 'serve -s dist -l 3000' >> /app/start.sh && \
+    echo 'serve -s dist -l 4001' >> /app/start.sh && \
     chmod +x /app/start.sh
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 4001
+EXPOSE 4001
 
 # Health check for container monitoring
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD curl -f http://localhost:4001/ || exit 1
 
 # Use startup script that injects API key at runtime
 CMD ["/app/start.sh"]
