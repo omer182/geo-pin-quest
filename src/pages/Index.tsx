@@ -265,28 +265,34 @@ const Index = () => {
       </div>
 
       {gameState === 'PLAYING' && selectedPin && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-fade-up">
-          <div className="min-w-[260px]">
-            <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 px-8 shadow-2xl">
-              <Check className="mr-2 h-6 w-6" /> Confirm Guess
-            </Button>
+        <div className="absolute bottom-4 left-0 right-0 animate-fade-up">
+          <div className="flex justify-center">
+            <div className="min-w-[260px]">
+              <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 px-8 shadow-2xl">
+                <Check className="mr-2 h-6 w-6" /> Confirm Guess
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
       {gameState === 'RESULT' && lastGuessResult && (
-         <Card className="absolute bottom-4 left-1/2 -translate-x-1/2 min-w-[260px] animate-fade-up shadow-2xl bg-white/95 backdrop-blur-sm">
-           <CardContent className="p-3">
-             <div className="text-center">
-              <p className="text-xs font-semibold">You were {Math.round(lastGuessResult.distance)}km off!</p>
-              <p className="text-lg font-bold text-green-600 my-1">+{lastGuessResult.score} points</p>
-              
-              <Button onClick={handleNextTurn} className="w-full text-xs py-1.5 mt-1">
-                {currentTurn === TURNS_PER_LEVEL - 1 ? 'Complete Level' : 'Next Turn'}
-              </Button>
-             </div>
-           </CardContent>
-         </Card>
+        <div className="absolute bottom-4 left-0 right-0 animate-fade-up">
+          <div className="flex justify-center">
+            <Card className="min-w-[260px] shadow-2xl bg-white/95 backdrop-blur-sm">
+              <CardContent className="p-3">
+                <div className="text-center">
+                 <p className="text-xs font-semibold">You were {Math.round(lastGuessResult.distance)}km off!</p>
+                 <p className="text-lg font-bold text-green-600 my-1">+{lastGuessResult.score} points</p>
+                 
+                 <Button onClick={handleNextTurn} className="w-full text-xs py-1.5 mt-1">
+                   {currentTurn === TURNS_PER_LEVEL - 1 ? 'Complete Level' : 'Next Turn'}
+                 </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       )}
     </div>
   );

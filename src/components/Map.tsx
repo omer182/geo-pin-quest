@@ -66,7 +66,7 @@ const mapOptions = {
     showBicyclingLayer: false,
     gestureHandling: 'greedy',
     backgroundColor: '#4682b4', // Ocean blue background
-    minZoom: 1, // Allow world view
+    minZoom: 2, // Prevent excessive zoom out to maintain geography challenge
     maxZoom: 10, // Maximum zoom level for detailed view
     restriction: {
         latLngBounds: {
