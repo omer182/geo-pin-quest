@@ -155,7 +155,25 @@ const Map: React.FC<MapProps> = ({ googleMapsApiKey, onPinDrop, isInteractive, s
     }, [result]);
 
     if (loadError) {
-        return <div className="flex items-center justify-center h-full bg-red-100 text-red-700">Error loading map. Please check the API key.</div>;
+        return (
+            <div className="flex items-center justify-center h-full bg-red-100 text-red-700 p-4">
+                <div className="text-center">
+                    <h3 className="text-lg font-semibold mb-2">Google Maps API Error</h3>
+                    <p className="text-sm mb-4">
+                        {loadError.message || 'Error loading map. Please check the API key.'}
+                    </p>
+                    <div className="text-xs bg-white p-3 rounded border">
+                        <p className="font-semibold mb-1">To fix this:</p>
+                        <ol className="text-left list-decimal list-inside space-y-1">
+                            <li>Go to <a href="https://console.cloud.google.com/" target="_blank" className="text-blue-600 underline">Google Cloud Console</a></li>
+                            <li>Enable "Maps JavaScript API"</li>
+                            <li>Create/update API key in .env file</li>
+                            <li>Set up billing (required for Google Maps)</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (!isLoaded) return <div className="flex items-center justify-center h-full">Loading Map...</div>;

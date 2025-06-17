@@ -1,27 +1,17 @@
 {
-  "name": "geo-pin-quest",
-  "private": true,
+  "name": "@geo-pin-quest/frontend",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
-  "workspaces": [
-    "apps/*",
-    "shared"
-  ],
   "scripts": {
-    "dev:frontend": "npm run dev --workspace=apps/frontend",
-    "dev:backend": "npm run dev --workspace=apps/backend",
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "build:shared": "npm run build --workspace=shared",
-    "build:frontend": "npm run build --workspace=apps/frontend",
-    "build:backend": "npm run build --workspace=apps/backend",
-    "build": "npm run build:shared && npm run build:frontend && npm run build:backend",
-    "lint": "npm run lint --workspace=apps/frontend && npm run lint --workspace=apps/backend",
-    "preview": "npm run preview --workspace=apps/frontend",
-    "docker:build": "docker build -t geo-pin-quest .",
-    "docker:run": "docker run -p 4001:4001 --name geo-pin-quest-container geo-pin-quest",
-    "docker:stop": "docker stop geo-pin-quest-container && docker rm geo-pin-quest-container"
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@geo-pin-quest/shared": "*",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -52,8 +42,6 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@react-google-maps/api": "^2.20.6",
     "@tanstack/react-query": "^5.56.2",
-    "@types/mapbox-gl": "^3.4.1",
-    "@types/uuid": "^10.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -61,7 +49,6 @@
     "embla-carousel-react": "^8.3.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
-    "nanoid": "^5.1.5",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -74,13 +61,26 @@
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.1.0",
     "vaul": "^0.9.3",
     "zod": "^3.23.8",
-    "zustand": "^5.0.5"
+    "zustand": "^4.5.7"
   },
   "devDependencies": {
-    "concurrently": "^9.0.1",
-    "typescript": "^5.5.3"
+    "@eslint/js": "^9.9.0",
+    "@tailwindcss/typography": "^0.5.15",
+    "@types/node": "^22.5.5",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.9.0",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "globals": "^15.9.0",
+    "lovable-tagger": "^1.1.7",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.11",
+    "typescript-eslint": "^8.0.1",
+    "vite": "^5.4.1"
   }
 }

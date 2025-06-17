@@ -19,4 +19,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  envDir: path.resolve(__dirname, "../.."), // Look for .env files in the root directory
 }));

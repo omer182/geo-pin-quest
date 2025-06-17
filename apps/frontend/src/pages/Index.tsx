@@ -8,7 +8,10 @@ import LevelComplete from '@/components/LevelComplete';
 import { WorldMapBackground, Globe3D, FloatingElements } from '@/components/BackgroundElements';
 import { getRandomCitiesFromLevel } from '@/data/cities';
 import { getDistance, calculateScore, canAdvanceToNextLevel, getMinimumPointsForLevel } from '@/lib/geo';
-import { MapPin, Check, Star, Trophy } from 'lucide-react';
+import { MapPin, Check, Star, Trophy, Users, Plus } from 'lucide-react';
+import { CreateRoomModal } from '@/components/multiplayer/CreateRoomModal';
+import { JoinRoomModal } from '@/components/multiplayer/JoinRoomModal';
+import { useNavigate } from 'react-router-dom';
 
 type GameState = 'START' | 'PLAYING' | 'RESULT' | 'LEVEL_COMPLETE' | 'GAME_OVER';
 type LatLng = { lat: number; lng: number; };
@@ -25,6 +28,10 @@ const Index = () => {
   const [selectedPin, setSelectedPin] = useState<LatLng | null>(null);
   const [leveledUp, setLeveledUp] = useState(false);
   const [cityCardCentered, setCityCardCentered] = useState(true);
+  const [createRoomOpen, setCreateRoomOpen] = useState(false);
+  const [joinRoomOpen, setJoinRoomOpen] = useState(false);
+  
+  const navigate = useNavigate();
   
   const cities = useMemo(() => getRandomCitiesFromLevel(currentLevel, TURNS_PER_LEVEL), [currentLevel]);
   const currentCity = cities[currentTurn];
@@ -161,9 +168,39 @@ const Index = () => {
                 size="lg" 
                 className="btn-adventure text-xl px-12 py-6 font-semibold"
               >
-                🎯 Start Adventure
+                🎯 Start Solo Adventure
                 <MapPin className="ml-3 h-6 w-6" />
               </Button>
+              
+              {/* Multiplayer Options */}
+              <div className="space-y-4">
+                <div className="text-white/80 text-lg font-medium">Or challenge a friend:</div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <CreateRoomModal open={createRoomOpen} onOpenChange={setCreateRoomOpen}>
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="text-lg px-8 py-4 bg-blue-600/90 text-white border-blue-400 hover:bg-blue-500 backdrop-blur-sm"
+                      onClick={() => setCreateRoomOpen(true)}
+                    >
+                      <Plus className="mr-2 h-5 w-5" />
+                      Create Room
+                    </Button>
+                  </CreateRoomModal>
+                  
+                  <JoinRoomModal open={joinRoomOpen} onOpenChange={setJoinRoomOpen}>
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="text-lg px-8 py-4 bg-blue-600/90 text-white border-blue-400 hover:bg-blue-500 backdrop-blur-sm"
+                      onClick={() => setJoinRoomOpen(true)}
+                    >
+                      <Users className="mr-2 h-5 w-5" />
+                      Join Room
+                    </Button>
+                  </JoinRoomModal>
+                </div>
+              </div>
               
               <div className="flex flex-wrap justify-center gap-6 text-white/70 text-sm">
                 <div className="flex items-center gap-2">
@@ -177,6 +214,10 @@ const Index = () => {
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🎯</span>
                   <span>Precision Challenge</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">👥</span>
+                  <span>1v1 Multiplayer</span>
                 </div>
               </div>
             </div>
