@@ -22,7 +22,6 @@ import { multiplayerActions } from '@/services/multiplayerIntegration';
 import { useToast } from '@/hooks/use-toast';
 import { ShareableLink } from './ShareableLink';
 import { PlayerList } from './PlayerList';
-import { RoomSettings } from './RoomSettings';
 
 export function RoomLobby() {
   const { toast } = useToast();

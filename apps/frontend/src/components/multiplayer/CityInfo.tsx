@@ -2,40 +2,42 @@ import React from 'react';
 import { useMultiplayerStore } from '../../stores/multiplayerStore';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { MapPin, Globe, Users } from 'lucide-react';
+import { MapPin, Globe } from 'lucide-react';
 
 interface CityInfoProps {
   className?: string;
 }
 
 export const CityInfo: React.FC<CityInfoProps> = ({ className }) => {
-  const currentCity = useMultiplayerStore((state) => state.game.currentCity);
-  const gameState = useMultiplayerStore((state) => state.game.state);
-  const difficulty = useMultiplayerStore((state) => state.room.settings?.difficulty);
+  const currentCity = useMultiplayerStore((state) => state.game?.currentCity);
+  const gamePhase = useMultiplayerStore((state) => state.game?.phase);
+  const difficulty = useMultiplayerStore((state) => state.room.current?.difficulty);
 
   // Only show city info during results phase
-  if (gameState !== 'results' && gameState !== 'round_ended' || !currentCity) {
+  if (gamePhase !== 'round-results' && gamePhase !== 'game-over' || !currentCity) {
     return null;
   }
 
-  const getDifficultyColor = (diff: string) => {
+  const getDifficultyColor = (diff: number) => {
     switch (diff) {
-      case 'easy': return 'bg-blue-100 text-blue-800';
-      case 'medium': return 'bg-blue-200 text-blue-900';
-      case 'hard': return 'bg-blue-300 text-blue-900';
+      case 1:
+      case 2: return 'bg-blue-100 text-blue-800';
+      case 3: return 'bg-blue-200 text-blue-900';
+      case 4:
+      case 5: return 'bg-blue-300 text-blue-900';
       default: return 'bg-blue-100 text-blue-800';
     }
   };
 
-  const formatPopulation = (population?: number) => {
-    if (!population) return 'Unknown';
-    if (population >= 1000000) {
-      return `${(population / 1000000).toFixed(1)}M`;
+  const getDifficultyLabel = (diff: number) => {
+    switch (diff) {
+      case 1: return 'Very Easy';
+      case 2: return 'Easy';
+      case 3: return 'Medium';
+      case 4: return 'Hard';
+      case 5: return 'Expert';
+      default: return 'Unknown';
     }
-    if (population >= 1000) {
-      return `${(population / 1000).toFixed(0)}K`;
-    }
-    return population.toLocaleString();
   };
 
   return (
@@ -56,31 +58,19 @@ export const CityInfo: React.FC<CityInfoProps> = ({ className }) => {
 
           {/* City Details */}
           <div className="space-y-2">
-            {currentCity.population && (
-              <div className="flex items-center text-sm text-gray-600">
-                <Users className="w-4 h-4 mr-2" />
-                <span>Population: {formatPopulation(currentCity.population)}</span>
-              </div>
-            )}
-
-            {currentCity.region && (
-              <div className="text-sm text-gray-600">
-                <span className="font-medium">Region:</span> {currentCity.region}
-              </div>
-            )}
-
+            {/* Remove population and region since they're not in the City type */}
             {difficulty && (
               <div className="flex items-center">
-                <span className="text-sm text-gray-600 mr-2">Difficulty:</span>
+                <span className="text-sm text-blue-600 mr-2">Difficulty:</span>
                 <Badge className={getDifficultyColor(difficulty)}>
-                  {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                  {getDifficultyLabel(difficulty)}
                 </Badge>
               </div>
             )}
           </div>
 
           {/* Coordinates */}
-          <div className="text-xs text-gray-500 border-t pt-2">
+          <div className="text-xs text-blue-500 border-t border-blue-200 pt-2">
             <span>
               {currentCity.lat.toFixed(4)}, {currentCity.lng.toFixed(4)}
             </span>

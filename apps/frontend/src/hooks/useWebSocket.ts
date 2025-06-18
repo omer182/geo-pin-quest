@@ -95,7 +95,8 @@ export function useWebSocketEvent<K extends keyof WebSocketServiceEvents>(
     return () => {
       webSocketService.off(event, handler);
     };
-  }, deps);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event, handler, ...deps]);
 }
 
 /**

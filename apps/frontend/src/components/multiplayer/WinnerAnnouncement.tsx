@@ -80,12 +80,13 @@ export const WinnerAnnouncement: React.FC<WinnerAnnouncementProps> = ({
   hideDelay = 4000 
 }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const players = useMultiplayerStore((state) => state.room.players);
-  const currentPlayerId = useMultiplayerStore((state) => state.room.playerId);
-  const roundResults = useMultiplayerStore((state) => state.game.roundResults);
-  const gameState = useMultiplayerStore((state) => state.game.state);
-  const currentRound = useMultiplayerStore((state) => state.game.currentRound);
-  const maxRounds = useMultiplayerStore((state) => state.room.settings?.maxRounds);
+  const currentPlayer = useMultiplayerStore((state) => state.currentPlayer);
+  const opponent = useMultiplayerStore((state) => state.opponent);
+  const currentPlayerId = useMultiplayerStore((state) => state.currentPlayer?.id);
+  const roundResults = useMultiplayerStore((state) => state.game?.roundResults);
+  const gamePhase = useMultiplayerStore((state) => state.game?.phase);
+  const currentRound = useMultiplayerStore((state) => state.game?.currentRound);
+  const maxRounds = useMultiplayerStore((state) => state.room.current?.roundLimit);
 
   useEffect(() => {
     if (autoHide && hideDelay > 0) {
@@ -103,44 +104,94 @@ export const WinnerAnnouncement: React.FC<WinnerAnnouncementProps> = ({
   }, [roundResults?.length]);
 
   // Only show during results phase
-  if (!isVisible || gameState !== 'results' || !roundResults || roundResults.length === 0) {
+  if (!isVisible || gamePhase !== 'round-results' || !roundResults || roundResults.length === 0 || !currentPlayer) {
     return null;
   }
 
   const currentRoundResults = roundResults[roundResults.length - 1];
-  const isGameOver = currentRound === maxRounds && gameState === 'results';
+  const isGameOver = currentRound === maxRounds && gamePhase === 'round-results';
 
   // Find the winner(s) - could be tied
   let winners: Array<{ playerId: string; playerName: string; score: number; isCurrentPlayer: boolean }> = [];
 
   if (isGameOver) {
-    // Game winner - highest total score
-    const maxTotalScore = Math.max(...currentRoundResults.results.map(r => r.totalScore));
-    winners = currentRoundResults.results
-      .filter(r => r.totalScore === maxTotalScore)
-      .map(r => {
-        const player = players.find(p => p.id === r.playerId);
-        return {
-          playerId: r.playerId,
-          playerName: player?.name || 'Unknown Player',
-          score: r.totalScore,
-          isCurrentPlayer: r.playerId === currentPlayerId
-        };
-      });
+    // Game winner - highest total score across all rounds
+    const currentPlayerTotal = roundResults.reduce((total, result) => {
+      return total + (currentPlayer?.isHost ? result.hostScore : result.opponentScore);
+    }, 0);
+    
+    const opponentTotal = roundResults.reduce((total, result) => {
+      return total + (currentPlayer?.isHost ? result.opponentScore : result.hostScore);
+    }, 0);
+
+    // Determine winner(s)
+    if (currentPlayerTotal > opponentTotal) {
+      winners = [{
+        playerId: currentPlayer?.id || '',
+        playerName: currentPlayer?.name || 'You',
+        score: currentPlayerTotal,
+        isCurrentPlayer: true
+      }];
+    } else if (opponentTotal > currentPlayerTotal) {
+      winners = [{
+        playerId: opponent?.id || 'opponent',
+        playerName: opponent?.name || 'Opponent',
+        score: opponentTotal,
+        isCurrentPlayer: false
+      }];
+    } else {
+      // Tie
+      winners = [
+        {
+          playerId: currentPlayer?.id || '',
+          playerName: currentPlayer?.name || 'You',
+          score: currentPlayerTotal,
+          isCurrentPlayer: true
+        },
+        {
+          playerId: opponent?.id || 'opponent',
+          playerName: opponent?.name || 'Opponent',
+          score: opponentTotal,
+          isCurrentPlayer: false
+        }
+      ];
+    }
   } else {
-    // Round winner - highest round score
-    const maxRoundScore = Math.max(...currentRoundResults.results.map(r => r.score));
-    winners = currentRoundResults.results
-      .filter(r => r.score === maxRoundScore)
-      .map(r => {
-        const player = players.find(p => p.id === r.playerId);
-        return {
-          playerId: r.playerId,
-          playerName: player?.name || 'Unknown Player',
-          score: r.score,
-          isCurrentPlayer: r.playerId === currentPlayerId
-        };
-      });
+    // Round winner - highest score for current round
+    const currentPlayerScore = currentPlayer?.isHost ? currentRoundResults.hostScore : currentRoundResults.opponentScore;
+    const opponentScore = currentPlayer?.isHost ? currentRoundResults.opponentScore : currentRoundResults.hostScore;
+
+    if (currentPlayerScore > opponentScore) {
+      winners = [{
+        playerId: currentPlayer?.id || '',
+        playerName: currentPlayer?.name || 'You',
+        score: currentPlayerScore,
+        isCurrentPlayer: true
+      }];
+    } else if (opponentScore > currentPlayerScore) {
+      winners = [{
+        playerId: opponent?.id || 'opponent',
+        playerName: opponent?.name || 'Opponent',
+        score: opponentScore,
+        isCurrentPlayer: false
+      }];
+    } else {
+      // Tie
+      winners = [
+        {
+          playerId: currentPlayer?.id || '',
+          playerName: currentPlayer?.name || 'You',
+          score: currentPlayerScore,
+          isCurrentPlayer: true
+        },
+        {
+          playerId: opponent?.id || 'opponent',
+          playerName: opponent?.name || 'Opponent',
+          score: opponentScore,
+          isCurrentPlayer: false
+        }
+      ];
+    }
   }
 
   if (winners.length === 0) {

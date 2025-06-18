@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
 import { open, Database } from 'sqlite';
 import path from 'path';
+import { RoundResult } from '@geo-pin-quest/shared';
 
 // Database interfaces matching the schema design
 export interface GameHistoryRecord {
@@ -185,7 +186,7 @@ export async function saveGameResult(
   winnerPlayerId: string | null,
   startedAt: Date,
   completedAt: Date,
-  roundResults: any[]
+  roundResults: RoundResult[]
 ): Promise<number> {
   const database = getDatabase();
   

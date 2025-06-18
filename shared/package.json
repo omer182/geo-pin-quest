@@ -10,9 +10,9 @@
     "build:watch": "tsc --watch"
   },
   "dependencies": {
+    "@types/uuid": "^10.0.0",
     "nanoid": "^5.1.5",
-    "uuid": "^11.1.0",
-    "@types/uuid": "^10.0.0"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.5.5"

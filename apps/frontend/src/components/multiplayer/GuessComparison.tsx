@@ -74,30 +74,49 @@ const PlayerResult: React.FC<PlayerResultProps> = ({
 };
 
 export const GuessComparison: React.FC<GuessComparisonProps> = ({ className }) => {
-  const currentPlayerId = useMultiplayerStore((state) => state.room.playerId);
-  const players = useMultiplayerStore((state) => state.room.players);
-  const roundResults = useMultiplayerStore((state) => state.game.roundResults);
-  const gameState = useMultiplayerStore((state) => state.game.state);
+  const currentPlayer = useMultiplayerStore((state) => state.currentPlayer);
+  const opponent = useMultiplayerStore((state) => state.opponent);
+  const roundResults = useMultiplayerStore((state) => state.game?.roundResults);
+  const gamePhase = useMultiplayerStore((state) => state.game?.phase);
 
   // Only show during results phase
-  if (gameState !== 'results' && gameState !== 'round_ended') {
+  if (gamePhase !== 'round-results' || !roundResults || roundResults.length === 0 || !currentPlayer) {
     return null;
   }
 
-  const currentRoundResults = roundResults?.[roundResults.length - 1];
+  const currentRoundResults = roundResults[roundResults.length - 1];
   if (!currentRoundResults) {
     return null;
   }
 
-  // Sort results by score (descending) and add rank
-  const sortedResults = currentRoundResults.results
+  // Create player results from the round data
+  const playerResults = [
+    {
+      playerId: currentPlayer.id,
+      playerName: currentPlayer.name,
+      distance: currentPlayer.isHost ? currentRoundResults.hostGuess.distance : currentRoundResults.opponentGuess.distance,
+      score: currentPlayer.isHost ? currentRoundResults.hostScore : currentRoundResults.opponentScore,
+      isCurrentPlayer: true
+    }
+  ];
+
+  if (opponent) {
+    playerResults.push({
+      playerId: opponent.id,
+      playerName: opponent.name,
+      distance: currentPlayer.isHost ? currentRoundResults.opponentGuess.distance : currentRoundResults.hostGuess.distance,
+      score: currentPlayer.isHost ? currentRoundResults.opponentScore : currentRoundResults.hostScore,
+      isCurrentPlayer: false
+    });
+  }
+
+  // Sort by score (descending) and add rank
+  const sortedResults = playerResults
+    .sort((a, b) => b.score - a.score)
     .map((result, index) => ({
       ...result,
-      rank: index + 1,
-      player: players.find(p => p.id === result.playerId)
-    }))
-    .filter(result => result.player)
-    .sort((a, b) => b.score - a.score);
+      rank: index + 1
+    }));
 
   // Update ranks after sorting
   sortedResults.forEach((result, index) => {
@@ -108,7 +127,7 @@ export const GuessComparison: React.FC<GuessComparisonProps> = ({ className }) =
     <Card className={`max-w-lg ${className}`}>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold text-center">
-          Round {currentRoundResults.round} Results
+          Round {currentRoundResults.roundNumber} Results
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -116,10 +135,10 @@ export const GuessComparison: React.FC<GuessComparisonProps> = ({ className }) =
           <PlayerResult
             key={result.playerId}
             playerId={result.playerId}
-            playerName={result.player!.name}
+            playerName={result.playerName}
             distance={result.distance}
             score={result.score}
-            isCurrentPlayer={result.playerId === currentPlayerId}
+            isCurrentPlayer={result.isCurrentPlayer}
             rank={result.rank}
           />
         ))}

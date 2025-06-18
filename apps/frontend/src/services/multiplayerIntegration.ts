@@ -19,27 +19,26 @@ export class WebSocketIntegration {
       return;
     }
 
-    const store = useMultiplayerStore.getState();
-
     // Connection events
     webSocketService.on('connection-status-changed', (status: ConnectionStatus) => {
-      store.actions.setConnectionStatus(status);
+      const actions = useMultiplayerStore.getState().actions;
+      actions.setConnectionStatus(status);
       
       // Show connection status notification for important changes
       if (status === ConnectionStatus.CONNECTED) {
-        store.actions.addNotification({
+        actions.addNotification({
           type: 'success',
           message: 'Connected to game server',
           autoHide: true,
         });
       } else if (status === ConnectionStatus.RECONNECTING) {
-        store.actions.addNotification({
+        actions.addNotification({
           type: 'warning',
           message: 'Reconnecting to game server...',
           autoHide: false,
         });
       } else if (status === ConnectionStatus.ERROR) {
-        store.actions.addNotification({
+        actions.addNotification({
           type: 'error',
           message: 'Connection to game server failed',
           autoHide: false,
@@ -48,8 +47,9 @@ export class WebSocketIntegration {
     });
 
     webSocketService.on('connection-error', (error: string) => {
-      store.actions.setConnectionError(error);
-      store.actions.addNotification({
+      const actions = useMultiplayerStore.getState().actions;
+      actions.setConnectionError(error);
+      actions.addNotification({
         type: 'error',
         message: `Connection error: ${error}`,
         autoHide: false,
@@ -60,23 +60,24 @@ export class WebSocketIntegration {
     webSocketService.on('room-created', ({ room, shareableLink }) => {
       dev.log('Room created event received:', { room, shareableLink });
       
-      store.actions.setRoom(room);
-      store.actions.setShareableLink(shareableLink);
-      store.actions.setRoomLoading('creating', false);
-      store.actions.setRoomError('create', null);
+      const actions = useMultiplayerStore.getState().actions;
+      actions.setRoom(room);
+      actions.setShareableLink(shareableLink);
+      actions.setRoomLoading('creating', false);
+      actions.setRoomError('create', null);
       
       // Set current player as host
-      store.actions.setCurrentPlayer({
+      actions.setCurrentPlayer({
         id: room.hostId,
         name: `Host ${room.hostId.slice(0, 6)}`, // Temporary name
         isHost: true,
       });
       
       // Navigate to room lobby
-      store.actions.setActiveView('room-lobby');
-      store.actions.showRoomCode(true);
+      actions.setActiveView('room-lobby');
+      actions.showRoomCode(true);
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: 'success',
         message: `Room ${room.id} created successfully!`,
         autoHide: true,
@@ -86,22 +87,23 @@ export class WebSocketIntegration {
     webSocketService.on('room-joined', ({ room, isHost }) => {
       dev.log('Room joined event received:', { room, isHost });
       
-      store.actions.setRoom(room);
-      store.actions.setRoomLoading('joining', false);
-      store.actions.setRoomError('join', null);
+      const actions = useMultiplayerStore.getState().actions;
+      actions.setRoom(room);
+      actions.setRoomLoading('joining', false);
+      actions.setRoomError('join', null);
       
       // Set current player
       const playerId = isHost ? room.hostId : room.opponentId!;
-      store.actions.setCurrentPlayer({
+      actions.setCurrentPlayer({
         id: playerId,
         name: isHost ? 'Host' : 'Opponent',
         isHost,
       });
       
       // Navigate to room lobby
-      store.actions.setActiveView('room-lobby');
+      actions.setActiveView('room-lobby');
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: 'success',
         message: `Joined room ${room.id}`,
         autoHide: true,
@@ -111,9 +113,10 @@ export class WebSocketIntegration {
     webSocketService.on('player-joined', ({ opponent }) => {
       dev.log('Player joined event received:', opponent);
       
-      store.actions.setOpponent(opponent);
+      const actions = useMultiplayerStore.getState().actions;
+      actions.setOpponent(opponent);
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: 'info',
         message: `${opponent.name} joined the room`,
         autoHide: true,
@@ -123,12 +126,13 @@ export class WebSocketIntegration {
     webSocketService.on('player-left', ({ playerId }) => {
       dev.log('Player left event received:', playerId);
       
-      const currentState = store.getState();
+      const store = useMultiplayerStore.getState();
+      const actions = store.actions;
       
       // If opponent left, clear opponent
-      if (currentState.opponent?.id === playerId) {
-        store.actions.setOpponent(null);
-        store.actions.addNotification({
+      if (store.opponent?.id === playerId) {
+        actions.setOpponent(null);
+        actions.addNotification({
           type: 'warning',
           message: 'Your opponent left the room',
           autoHide: true,
@@ -136,8 +140,8 @@ export class WebSocketIntegration {
       }
       
       // If in game, show disconnection message
-      if (currentState.game && currentState.game.phase !== 'lobby') {
-        store.actions.addNotification({
+      if (store.game && store.game.phase !== 'lobby') {
+        actions.addNotification({
           type: 'error',
           message: 'Game interrupted - player disconnected',
           autoHide: false,
@@ -148,10 +152,11 @@ export class WebSocketIntegration {
     webSocketService.on('room-full', ({ error }) => {
       dev.log('Room full event received:', error);
       
-      store.actions.setRoomLoading('joining', false);
-      store.actions.setRoomError('join', error);
+      const actions = useMultiplayerStore.getState().actions;
+      actions.setRoomLoading('joining', false);
+      actions.setRoomError('join', error);
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: 'error',
         message: error,
         autoHide: true,
@@ -162,10 +167,11 @@ export class WebSocketIntegration {
     webSocketService.on('game-started', ({ gameState }) => {
       dev.log('Game started event received:', gameState);
       
-      store.actions.setGameState(gameState);
-      store.actions.setActiveView('game');
+      const actions = useMultiplayerStore.getState().actions;
+      actions.setGameState(gameState);
+      actions.setActiveView('game');
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: 'success',
         message: 'Game started! Get ready for the first round.',
         autoHide: true,
@@ -175,16 +181,17 @@ export class WebSocketIntegration {
     webSocketService.on('round-started', ({ city, roundNumber, timeLimit }) => {
       dev.log('Round started event received:', { city, roundNumber, timeLimit });
       
-      const currentState = store.getState();
-      if (currentState.game) {
-        store.actions.setCurrentCity(city);
-        store.actions.setTimeRemaining(timeLimit);
-        store.actions.setTimerActive(true);
-        store.actions.setGuessSubmitted(false);
-        store.actions.setOpponentGuessed(false);
-        store.actions.updateGamePhase('playing');
+      const store = useMultiplayerStore.getState();
+      const actions = store.actions;
+      if (store.game) {
+        actions.setCurrentCity(city);
+        actions.setTimeRemaining(timeLimit);
+        actions.setTimerActive(true);
+        actions.setGuessSubmitted(false);
+        actions.setOpponentGuessed(false);
+        actions.updateGamePhase('playing');
         
-        store.actions.addNotification({
+        actions.addNotification({
           type: 'info',
           message: `Round ${roundNumber} started! Find ${city.name}, ${city.country}`,
           autoHide: true,
@@ -195,14 +202,15 @@ export class WebSocketIntegration {
     webSocketService.on('guess-received', ({ playerId, hasGuessed }) => {
       dev.log('Guess received event:', { playerId, hasGuessed });
       
-      const currentState = store.getState();
+      const store = useMultiplayerStore.getState();
+      const actions = store.actions;
       
       // If it's the opponent's guess
-      if (currentState.opponent?.id === playerId) {
-        store.actions.setOpponentGuessed(hasGuessed);
+      if (store.opponent?.id === playerId) {
+        actions.setOpponentGuessed(hasGuessed);
         
         if (hasGuessed) {
-          store.actions.addNotification({
+          actions.addNotification({
             type: 'info',
             message: 'Your opponent has made their guess!',
             autoHide: true,
@@ -214,16 +222,17 @@ export class WebSocketIntegration {
     webSocketService.on('round-ended', ({ result, gameState }) => {
       dev.log('Round ended event received:', { result, gameState });
       
-      store.actions.addRoundResult(result);
-      store.actions.setGameState(gameState);
-      store.actions.updateGamePhase('round-results');
-      store.actions.setTimerActive(false);
+      const actions = useMultiplayerStore.getState().actions;
+      actions.addRoundResult(result);
+      actions.setGameState(gameState);
+      actions.updateGamePhase('round-results');
+      actions.setTimerActive(false);
       
       // Determine winner of the round
       const isHostWinner = result.hostScore > result.opponentScore;
       const isTie = result.hostScore === result.opponentScore;
-      const currentState = store.getState();
-      const isCurrentPlayerHost = currentState.currentPlayer?.isHost;
+      const store = useMultiplayerStore.getState();
+      const isCurrentPlayerHost = store.currentPlayer?.isHost;
       
       let message = '';
       if (isTie) {
@@ -234,7 +243,7 @@ export class WebSocketIntegration {
         message = 'Your opponent won this round';
       }
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: isTie ? 'info' : ((isHostWinner && isCurrentPlayerHost) || (!isHostWinner && !isCurrentPlayerHost)) ? 'success' : 'warning',
         message,
         autoHide: true,
@@ -244,13 +253,14 @@ export class WebSocketIntegration {
     webSocketService.on('game-ended', ({ winner, finalScores }) => {
       dev.log('Game ended event received:', { winner, finalScores });
       
-      store.actions.updateGamePhase('game-over');
-      store.actions.setWinner(winner?.id || null);
-      store.actions.setTimerActive(false);
-      store.actions.setActiveView('results');
+      const actions = useMultiplayerStore.getState().actions;
+      actions.updateGamePhase('game-over');
+      actions.setWinner(winner?.id || null);
+      actions.setTimerActive(false);
+      actions.setActiveView('results');
       
-      const currentState = store.getState();
-      const isCurrentPlayerWinner = winner?.id === currentState.currentPlayer?.id;
+      const store = useMultiplayerStore.getState();
+      const isCurrentPlayerWinner = winner?.id === store.currentPlayer?.id;
       
       let message = '';
       if (!winner) {
@@ -261,7 +271,7 @@ export class WebSocketIntegration {
         message = 'Game over. Better luck next time!';
       }
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: !winner ? 'info' : isCurrentPlayerWinner ? 'success' : 'warning',
         message,
         autoHide: false,
@@ -271,7 +281,8 @@ export class WebSocketIntegration {
     webSocketService.on('opponent-disconnected', ({ message }) => {
       dev.log('Opponent disconnected event received:', message);
       
-      store.actions.addNotification({
+      const actions = useMultiplayerStore.getState().actions;
+      actions.addNotification({
         type: 'warning',
         message,
         autoHide: false,
@@ -281,7 +292,8 @@ export class WebSocketIntegration {
     webSocketService.on('opponent-reconnected', ({ message }) => {
       dev.log('Opponent reconnected event received:', message);
       
-      store.actions.addNotification({
+      const actions = useMultiplayerStore.getState().actions;
+      actions.addNotification({
         type: 'success',
         message,
         autoHide: true,
@@ -291,10 +303,11 @@ export class WebSocketIntegration {
     webSocketService.on('play-again-vote', ({ playerId, vote }) => {
       dev.log('Play again vote event received:', { playerId, vote });
       
-      const currentState = store.getState();
-      const voterName = currentState.currentPlayer?.id === playerId ? 'You' : 'Your opponent';
+      const store = useMultiplayerStore.getState();
+      const actions = store.actions;
+      const voterName = store.currentPlayer?.id === playerId ? 'You' : 'Your opponent';
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: 'info',
         message: `${voterName} ${vote ? 'voted to play again' : 'declined to play again'}`,
         autoHide: true,
@@ -304,11 +317,12 @@ export class WebSocketIntegration {
     webSocketService.on('new-game-starting', ({ gameState }) => {
       dev.log('New game starting event received:', gameState);
       
-      store.actions.setGameState(gameState);
-      store.actions.setActiveView('game');
-      store.actions.clearNotifications();
+      const actions = useMultiplayerStore.getState().actions;
+      actions.setGameState(gameState);
+      actions.setActiveView('game');
+      actions.clearNotifications();
       
-      store.actions.addNotification({
+      actions.addNotification({
         type: 'success',
         message: 'New game starting!',
         autoHide: true,

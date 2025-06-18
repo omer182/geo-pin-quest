@@ -58,41 +58,65 @@ const GuessMarker: React.FC<MarkerProps> = ({
 };
 
 export const GuessMarkers: React.FC<GuessMarkersProps> = ({ className }) => {
-  const currentPlayerId = useMultiplayerStore((state) => state.room.playerId);
-  const players = useMultiplayerStore((state) => state.room.players);
-  const gameState = useMultiplayerStore((state) => state.game.state);
-  const currentRoundData = useMultiplayerStore((state) => state.game.currentRoundData);
-  const roundResults = useMultiplayerStore((state) => state.game.roundResults);
+  const currentPlayer = useMultiplayerStore((state) => state.currentPlayer);
+  const opponent = useMultiplayerStore((state) => state.opponent);
+  const gamePhase = useMultiplayerStore((state) => state.game?.phase);
+  const roundResults = useMultiplayerStore((state) => state.game?.roundResults);
 
-  // Show markers only after guessing phase or during results
-  if (gameState !== 'results' && gameState !== 'round_ended') {
+  // Show markers only during results phase
+  if (gamePhase !== 'round-results' || !roundResults || roundResults.length === 0 || !currentPlayer) {
     return null;
   }
 
-  const playerGuesses = currentRoundData?.guesses || {};
-  const currentRoundResults = roundResults?.[roundResults.length - 1];
+  const currentRoundResults = roundResults[roundResults.length - 1];
+  if (!currentRoundResults) {
+    return null;
+  }
+
+  const markers = [];
+
+  // Add current player's marker
+  const currentPlayerGuess = currentPlayer.isHost ? currentRoundResults.hostGuess : currentRoundResults.opponentGuess;
+  const currentPlayerScore = currentPlayer.isHost ? currentRoundResults.hostScore : currentRoundResults.opponentScore;
+  
+  markers.push({
+    playerId: currentPlayer.id,
+    playerName: currentPlayer.name,
+    guess: currentPlayerGuess,
+    distance: currentPlayerGuess.distance,
+    score: currentPlayerScore,
+    isCurrentPlayer: true
+  });
+
+  // Add opponent's marker if exists
+  if (opponent) {
+    const opponentGuess = currentPlayer.isHost ? currentRoundResults.opponentGuess : currentRoundResults.hostGuess;
+    const opponentScore = currentPlayer.isHost ? currentRoundResults.opponentScore : currentRoundResults.hostScore;
+    
+    markers.push({
+      playerId: opponent.id,
+      playerName: opponent.name,
+      guess: opponentGuess,
+      distance: opponentGuess.distance,
+      score: opponentScore,
+      isCurrentPlayer: false
+    });
+  }
 
   return (
     <div className={`absolute inset-0 pointer-events-none ${className}`}>
-      {Object.entries(playerGuesses).map(([playerId, guess]) => {
-        const player = players.find(p => p.id === playerId);
-        if (!player || !guess) return null;
-
-        const playerResult = currentRoundResults?.results.find(r => r.playerId === playerId);
-        
-        return (
-          <GuessMarker
-            key={playerId}
-            lat={guess.lat}
-            lng={guess.lng}
-            playerId={playerId}
-            playerName={player.name}
-            isCurrentPlayer={playerId === currentPlayerId}
-            distance={playerResult?.distance}
-            score={playerResult?.score}
-          />
-        );
-      })}
+      {markers.map((marker) => (
+        <GuessMarker
+          key={marker.playerId}
+          lat={marker.guess.lat}
+          lng={marker.guess.lng}
+          playerId={marker.playerId}
+          playerName={marker.playerName}
+          isCurrentPlayer={marker.isCurrentPlayer}
+          distance={marker.distance}
+          score={marker.score}
+        />
+      ))}
     </div>
   );
 };

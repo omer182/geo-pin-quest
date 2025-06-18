@@ -101,7 +101,7 @@ export const dev = {
   /**
    * Log debug information (only in development)
    */
-  log: (...args: any[]) => {
+  log: (...args: unknown[]) => {
     if (config.enableDebugLogs) {
       console.log('[Dev]', ...args);
     }
@@ -110,7 +110,7 @@ export const dev = {
   /**
    * Log warning information (only in development)
    */
-  warn: (...args: any[]) => {
+  warn: (...args: unknown[]) => {
     if (config.enableDebugLogs) {
       console.warn('[Dev]', ...args);
     }
@@ -119,7 +119,7 @@ export const dev = {
   /**
    * Log error information (only in development)
    */
-  error: (...args: any[]) => {
+  error: (...args: unknown[]) => {
     if (config.enableDebugLogs) {
       console.error('[Dev]', ...args);
     }

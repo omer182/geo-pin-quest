@@ -36,8 +36,10 @@ export function RoundResults({ result, onContinue }: RoundResultsProps) {
 
   const currentPlayerScore = currentPlayer.isHost ? result.hostScore : result.opponentScore;
   const opponentScore = currentPlayer.isHost ? result.opponentScore : result.hostScore;
-  const currentPlayerDistance = currentPlayer.isHost ? result.hostDistance : result.opponentDistance;
-  const opponentDistance = currentPlayer.isHost ? result.opponentDistance : result.hostDistance;
+  const currentPlayerGuess = currentPlayer.isHost ? result.hostGuess : result.opponentGuess;
+  const opponentGuess = currentPlayer.isHost ? result.opponentGuess : result.hostGuess;
+  const currentPlayerDistance = currentPlayerGuess.distance;
+  const opponentDistance = opponentGuess.distance;
 
   const isWinner = currentPlayerScore > opponentScore;
   const isTie = currentPlayerScore === opponentScore;

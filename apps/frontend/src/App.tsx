@@ -5,8 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import { CreateRoomModal } from "./components/multiplayer/CreateRoomModal";
-import { JoinRoomModal } from "./components/multiplayer/JoinRoomModal";
+import CreateRoomPage from "./pages/CreateRoomPage";
 import { RoomLobby } from "./components/multiplayer/RoomLobby";
 import { MultiplayerGame } from "./components/multiplayer/MultiplayerGame";
 
@@ -21,8 +20,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           {/* Multiplayer Routes */}
-          <Route path="/multiplayer/create" element={<CreateRoomModal />} />
-          <Route path="/multiplayer/join/:roomId?" element={<JoinRoomModal />} />
+          <Route path="/multiplayer/create" element={<CreateRoomPage />} />
+          <Route path="/multiplayer/join/:roomId?" element={<Index />} />
           <Route path="/multiplayer/lobby/:roomId" element={<RoomLobby />} />
           <Route path="/multiplayer/game/:roomId" element={<MultiplayerGame />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

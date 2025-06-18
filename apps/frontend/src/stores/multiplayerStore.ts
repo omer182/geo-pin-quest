@@ -300,6 +300,12 @@ export const useMultiplayerStore = create<MultiplayerState>()(
         }));
       },
       
+      setCurrentGuess: (guess: { lat: number; lng: number } | null) => {
+        set((state) => ({
+          game: state.game ? { ...state.game, currentGuess: guess } : null,
+        }));
+      },
+      
       setGuessSubmitted: (submitted: boolean) => {
         set((state) => ({
           game: state.game ? { 

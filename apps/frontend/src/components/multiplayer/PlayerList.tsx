@@ -11,6 +11,8 @@ interface PlayerListProps {
   opponent: Player | null;
   showStatus?: boolean;
   showScores?: boolean;
+  currentPlayerScore?: number;
+  opponentScore?: number;
   className?: string;
 }
 
@@ -19,6 +21,8 @@ export function PlayerList({
   opponent, 
   showStatus = false, 
   showScores = false,
+  currentPlayerScore = 0,
+  opponentScore = 0,
   className 
 }: PlayerListProps) {
   
@@ -112,9 +116,9 @@ export function PlayerList({
                   </div>
                 )}
                 
-                {showScores && 'totalScore' in currentPlayer && (
+                {showScores && (
                   <p className="text-sm text-muted-foreground">
-                    Score: {currentPlayer.totalScore} points
+                    Score: {currentPlayerScore} points
                   </p>
                 )}
               </div>
@@ -163,7 +167,7 @@ export function PlayerList({
                   
                   {showScores && (
                     <p className="text-sm text-muted-foreground">
-                      Score: {opponent.totalScore} points
+                      Score: {opponentScore} points
                     </p>
                   )}
                 </div>

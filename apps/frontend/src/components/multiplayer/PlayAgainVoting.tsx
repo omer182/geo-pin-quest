@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useMultiplayerStore } from '../../stores/multiplayerStore';
-import { useWebSocket } from '../../hooks/useWebSocket';
+import { multiplayerActions } from '../../services/multiplayerIntegration';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -70,34 +70,32 @@ export const PlayAgainVoting: React.FC<PlayAgainVotingProps> = ({
   const [timeLeft, setTimeLeft] = useState(votingTimeLimit);
   const [hasVoted, setHasVoted] = useState(false);
   
-  const players = useMultiplayerStore((state) => state.room.players);
-  const currentPlayerId = useMultiplayerStore((state) => state.room.playerId);
-  const gameState = useMultiplayerStore((state) => state.game.state);
-  const playAgainVotes = useMultiplayerStore((state) => state.game.playAgainVotes || {});
-  
-  const { votePlayAgain } = useWebSocket();
+  const currentPlayer = useMultiplayerStore((state) => state.currentPlayer);
+  const opponent = useMultiplayerStore((state) => state.opponent);
+  const gamePhase = useMultiplayerStore((state) => state.game?.phase);
+  const playAgainVotes = useMultiplayerStore((state) => state.game?.playAgainVotes);
 
   // Countdown timer
   useEffect(() => {
-    if (gameState === 'play_again_voting' && timeLeft > 0) {
+    if (gamePhase === 'game-over' && timeLeft > 0) {
       const timer = setInterval(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
 
       return () => clearInterval(timer);
     }
-  }, [gameState, timeLeft]);
+  }, [gamePhase, timeLeft]);
 
   // Reset state when voting starts
   useEffect(() => {
-    if (gameState === 'play_again_voting') {
+    if (gamePhase === 'game-over') {
       setTimeLeft(votingTimeLimit);
       setHasVoted(false);
     }
-  }, [gameState, votingTimeLimit]);
+  }, [gamePhase, votingTimeLimit]);
 
-  // Only show during play again voting phase
-  if (gameState !== 'play_again_voting') {
+  // Only show during game over phase (when play again voting would occur)
+  if (gamePhase !== 'game-over' || !currentPlayer) {
     return null;
   }
 
@@ -105,22 +103,32 @@ export const PlayAgainVoting: React.FC<PlayAgainVotingProps> = ({
     if (hasVoted) return;
     
     setHasVoted(true);
-    await votePlayAgain(vote);
+    await multiplayerActions.votePlayAgain(vote);
   };
+
+  // Create players array from current data
+  const players = [currentPlayer];
+  if (opponent) {
+    players.push(opponent);
+  }
 
   // Calculate voting statistics
   const totalPlayers = players.length;
-  const votedPlayers = Object.keys(playAgainVotes).length;
-  const yesVotes = Object.values(playAgainVotes).filter(vote => vote === true).length;
-  const noVotes = Object.values(playAgainVotes).filter(vote => vote === false).length;
+  const hostVote = playAgainVotes?.host;
+  const opponentVote = playAgainVotes?.opponent;
+  
+  const votes = [hostVote, opponentVote].filter(v => v !== null && v !== undefined);
+  const votedPlayers = votes.length;
+  const yesVotes = votes.filter(vote => vote === true).length;
+  const noVotes = votes.filter(vote => vote === false).length;
   const progressPercentage = (votedPlayers / totalPlayers) * 100;
 
   // Check if voting is complete
   const allPlayersVoted = votedPlayers === totalPlayers;
   const majorityYes = yesVotes > totalPlayers / 2;
 
-  const currentPlayerVote = playAgainVotes[currentPlayerId];
-  const currentPlayerHasVoted = currentPlayerId in playAgainVotes;
+  const currentPlayerVote = currentPlayer.isHost ? hostVote : opponentVote;
+  const currentPlayerHasVoted = currentPlayerVote !== null && currentPlayerVote !== undefined;
 
   return (
     <Card className={`max-w-md ${className}`}>
@@ -194,16 +202,21 @@ export const PlayAgainVoting: React.FC<PlayAgainVotingProps> = ({
             <Users className="w-4 h-4 mr-1" />
             Player Votes
           </div>
-          {players.map(player => (
-            <PlayerVote
-              key={player.id}
-              playerId={player.id}
-              playerName={player.name}
-              hasVoted={player.id in playAgainVotes}
-              vote={playAgainVotes[player.id] || null}
-              isCurrentPlayer={player.id === currentPlayerId}
-            />
-          ))}
+          {players.map(player => {
+            const playerVote = player.isHost ? hostVote : opponentVote;
+            const playerHasVoted = playerVote !== null && playerVote !== undefined;
+            
+            return (
+              <PlayerVote
+                key={player.id}
+                playerId={player.id}
+                playerName={player.name}
+                hasVoted={playerHasVoted}
+                vote={playerVote}
+                isCurrentPlayer={player.id === currentPlayer.id}
+              />
+            );
+          })}
         </div>
 
         {/* Voting result preview */}

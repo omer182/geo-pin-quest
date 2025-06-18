@@ -1,8 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import type { ClientToServerEvents, ServerToClientEvents, Room, Player, GameState, Guess, City } from '@geo-pin-quest/shared';
 import { GameManager } from '../models/Game';
-import { getRandomCityByDifficulty } from '../utils/cities';
-import { validateGuessSubmission, validatePosition, isValidSocketId } from '../utils/validation';
 
 // In-memory storage for active games and timers
 const activeGames = new Map<string, GameManager>();

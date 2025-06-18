@@ -54,7 +54,7 @@ export interface WebSocketServiceEvents {
 export class WebSocketService {
   private socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
   private connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
-  private eventListeners: Map<keyof WebSocketServiceEvents, Set<Function>> = new Map();
+  private eventListeners: Map<keyof WebSocketServiceEvents, Set<(...args: unknown[]) => void>> = new Map();
   private reconnectAttempts = 0;
   private reconnectTimer: number | null = null;
   private isManualDisconnect = false;
@@ -277,7 +277,7 @@ export class WebSocketService {
     if (listeners) {
       listeners.forEach(listener => {
         try {
-          (listener as Function)(...args);
+          listener(...args);
         } catch (error) {
           dev.error('Error in event listener:', error);
         }

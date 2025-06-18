@@ -74,10 +74,10 @@ export const ScoreUpdate: React.FC<ScoreUpdateProps> = ({
   hideDelay = 5000 
 }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const players = useMultiplayerStore((state) => state.room.players);
-  const currentPlayerId = useMultiplayerStore((state) => state.room.playerId);
-  const roundResults = useMultiplayerStore((state) => state.game.roundResults);
-  const gameState = useMultiplayerStore((state) => state.game.state);
+  const currentPlayer = useMultiplayerStore((state) => state.currentPlayer);
+  const opponent = useMultiplayerStore((state) => state.opponent);
+  const roundResults = useMultiplayerStore((state) => state.game?.roundResults);
+  const gamePhase = useMultiplayerStore((state) => state.game?.phase);
 
   useEffect(() => {
     if (autoHide && hideDelay > 0) {
@@ -95,29 +95,47 @@ export const ScoreUpdate: React.FC<ScoreUpdateProps> = ({
   }, [roundResults?.length]);
 
   // Only show during results phase
-  if (!isVisible || gameState !== 'results' || !roundResults || roundResults.length === 0) {
+  if (!isVisible || gamePhase !== 'round-results' || !roundResults || roundResults.length === 0 || !currentPlayer) {
     return null;
   }
 
   const currentRoundResults = roundResults[roundResults.length - 1];
   const previousRoundResults = roundResults.length > 1 ? roundResults[roundResults.length - 2] : null;
 
-  // Calculate score changes
-  const scoreChanges = players.map(player => {
-    const currentResult = currentRoundResults.results.find(r => r.playerId === player.id);
-    const previousScore = previousRoundResults?.results.find(r => r.playerId === player.id)?.totalScore || 0;
-    const newScore = currentResult?.totalScore || previousScore;
-    const scoreChange = newScore - previousScore;
+  // Calculate score changes for current player
+  const currentPlayerPreviousScore = previousRoundResults ? 
+    (currentPlayer.isHost ? previousRoundResults.hostScore : previousRoundResults.opponentScore) : 0;
+  const currentPlayerNewScore = currentPlayer.isHost ? currentRoundResults.hostScore : currentRoundResults.opponentScore;
+  const currentPlayerChange = currentPlayerNewScore - currentPlayerPreviousScore;
 
-    return {
-      playerId: player.id,
-      playerName: player.name,
-      previousScore,
-      newScore,
-      scoreChange,
-      isCurrentPlayer: player.id === currentPlayerId
-    };
-  });
+  // Calculate score changes for players
+  const scoreChanges = [
+    {
+      playerId: currentPlayer.id,
+      playerName: currentPlayer.name,
+      previousScore: currentPlayerPreviousScore,
+      newScore: currentPlayerNewScore,
+      scoreChange: currentPlayerChange,
+      isCurrentPlayer: true
+    }
+  ];
+
+  // Add opponent if exists
+  if (opponent) {
+    const opponentPreviousScore = previousRoundResults ? 
+      (currentPlayer.isHost ? previousRoundResults.opponentScore : previousRoundResults.hostScore) : 0;
+    const opponentNewScore = currentPlayer.isHost ? currentRoundResults.opponentScore : currentRoundResults.hostScore;
+    const opponentChange = opponentNewScore - opponentPreviousScore;
+    
+    scoreChanges.push({
+      playerId: opponent.id,
+      playerName: opponent.name,
+      previousScore: opponentPreviousScore,
+      newScore: opponentNewScore,
+      scoreChange: opponentChange,
+      isCurrentPlayer: false
+    });
+  }
 
   return (
     <Card className={`max-w-md animate-in slide-in-from-top ${className}`}>

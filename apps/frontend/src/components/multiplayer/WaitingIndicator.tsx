@@ -87,6 +87,7 @@ export function WaitingIndicator({
 }
 
 // Preset waiting indicators for common scenarios
+// eslint-disable-next-line react-refresh/only-export-components
 export const MultiplayerWaitingIndicators = {
   ConnectingToServer: () => (
     <WaitingIndicator
