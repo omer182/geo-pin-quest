@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Users, Settings, Trophy } from 'lucide-react';
 import { useMultiplayerStore, multiplayerSelectors } from '@/stores/multiplayerStore';
-import { multiplayerActions } from '@/services/multiplayerIntegration';
+import { multiplayerActions, webSocketIntegration } from '@/services/multiplayerIntegration';
+import { webSocketService } from '@/services/websocket';
+import { useNavigate } from 'react-router-dom';
 
 interface CreateRoomModalProps {
   children: React.ReactNode;
@@ -22,6 +24,24 @@ export function CreateRoomModal({ children, open, onOpenChange }: CreateRoomModa
   const isConnected = multiplayerSelectors.isConnected(useMultiplayerStore.getState());
   const isCreating = room.isCreating;
   const createError = room.createError;
+  const navigate = useNavigate();
+
+  // Connect to WebSocket when modal opens
+  useEffect(() => {
+    if (open && !isConnected && !webSocketService.isConnected()) {
+      // Set up integration and connect
+      webSocketIntegration.setup();
+      webSocketService.connect().catch(console.error);
+    }
+  }, [open, isConnected]);
+
+  // Navigate to room lobby when room is created
+  useEffect(() => {
+    if (room.current?.id && !isCreating) {
+      onOpenChange?.(false); // Close modal
+      navigate(`/multiplayer/lobby/${room.current.id}`);
+    }
+  }, [room, isCreating, navigate, onOpenChange]);
 
   const handleCreateRoom = async () => {
     if (!isConnected) {

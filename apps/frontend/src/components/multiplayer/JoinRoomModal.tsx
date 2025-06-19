@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Users, User, AlertCircle } from 'lucide-react';
 import { useMultiplayerStore, multiplayerSelectors } from '@/stores/multiplayerStore';
-import { multiplayerActions } from '@/services/multiplayerIntegration';
+import { multiplayerActions, webSocketIntegration } from '@/services/multiplayerIntegration';
+import { webSocketService } from '@/services/websocket';
+import { useNavigate } from 'react-router-dom';
 
 interface JoinRoomModalProps {
   children: React.ReactNode;
@@ -24,6 +26,24 @@ export function JoinRoomModal({ children, open, onOpenChange, initialRoomCode }:
   const isConnected = multiplayerSelectors.isConnected(useMultiplayerStore.getState());
   const isJoining = room.isJoining;
   const joinError = room.joinError;
+  const navigate = useNavigate();
+
+  // Connect to WebSocket when modal opens
+  useEffect(() => {
+    if (open && !isConnected && !webSocketService.isConnected()) {
+      // Set up integration and connect
+      webSocketIntegration.setup();
+      webSocketService.connect().catch(console.error);
+    }
+  }, [open, isConnected]);
+
+  // Navigate to room lobby when room is joined
+  useEffect(() => {
+    if (room.current?.id && !isJoining) {
+      onOpenChange?.(false); // Close modal
+      navigate(`/multiplayer/lobby/${room.current.id}`);
+    }
+  }, [room, isJoining, navigate, onOpenChange]);
 
   const validateInputs = () => {
     const newErrors: { roomCode?: string; playerName?: string } = {};

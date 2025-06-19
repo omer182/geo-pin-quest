@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ import { PlayerList } from './PlayerList';
 
 export function RoomLobby() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { 
     room, 
     currentPlayer, 
@@ -41,6 +43,25 @@ export function RoomLobby() {
     // Auto-focus on the room lobby view
     actions.setActiveView('room-lobby');
   }, [actions]);
+
+  // Navigate to game when game starts
+  useEffect(() => {
+    const { ui, room } = useMultiplayerStore.getState();
+    if (ui.activeView === 'game' && room.current?.id) {
+      navigate(`/multiplayer/game/${room.current.id}`);
+    }
+  }, [navigate]);
+
+  // Listen for activeView changes to navigate to game
+  useEffect(() => {
+    const unsubscribe = useMultiplayerStore.subscribe((state) => {
+      if (state.ui.activeView === 'game' && state.room.current?.id) {
+        navigate(`/multiplayer/game/${state.room.current.id}`);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigate]);
 
   const handleStartGame = async () => {
     if (!canStartGame) return;
