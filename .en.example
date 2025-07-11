@@ -1,0 +1,7 @@
+# Google Maps API Configuration
+# Get your API key from: https://console.cloud.google.com/google/maps-apis/
+# Required APIs: Google Maps JavaScript API, Google Maps Geometry Library
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+
+# Optional Build Configuration
+VITE_BUILD_MODE=development
