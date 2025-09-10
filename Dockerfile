@@ -1,6 +1,6 @@
 # Multi-stage Docker build for Geo Pin Quest
 # Stage 1: Builder - Install dependencies and build the app
-FROM --platform=linux/arm64 node:20-alpine AS builder
+FROM node:2-alpine AS builder
 
 # Set working directory
 RUN mkdir -p /app
