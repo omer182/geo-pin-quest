@@ -1,6 +1,6 @@
 # Multi-stage Docker build for Geo Pin Quest
 # Stage 1: Builder - Install dependencies and build the app
-FROM node:2-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Set working directory
 RUN mkdir -p /app
@@ -20,7 +20,7 @@ ENV VITE_GOOGLE_MAPS_API_KEY=RUNTIME_REPLACEMENT_PLACEHOLDER
 RUN npm run build
 
 # Stage 2: Production - Minimal runtime image
-FROM --platform=linux/arm64 node:20-alpine AS production
+FROM node:22-alpine AS production
 
 # Set working directory
 WORKDIR /app
