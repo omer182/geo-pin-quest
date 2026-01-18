@@ -8,6 +8,7 @@ import LevelComplete from '@/components/LevelComplete';
 import { WorldMapBackground, Globe3D, FloatingElements } from '@/components/BackgroundElements';
 import { getRandomCitiesFromLevel } from '@/data/cities';
 import { getDistance, calculateScore, canAdvanceToNextLevel, getMinimumPointsForLevel } from '@/lib/geo';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { MapPin, Check, Star, Trophy } from 'lucide-react';
 
 type GameState = 'START' | 'PLAYING' | 'RESULT' | 'LEVEL_COMPLETE' | 'GAME_OVER';
@@ -25,6 +26,9 @@ const Index = () => {
   const [selectedPin, setSelectedPin] = useState<LatLng | null>(null);
   const [leveledUp, setLeveledUp] = useState(false);
   const [cityCardCentered, setCityCardCentered] = useState(true);
+  
+  const isMobile = useIsMobile();
+  const isTablet = !isMobile && window.innerWidth <= 1024;
   
   const cities = useMemo(() => getRandomCitiesFromLevel(currentLevel, TURNS_PER_LEVEL), [currentLevel]);
   const currentCity = cities[currentTurn];
@@ -228,8 +232,8 @@ const Index = () => {
       <div className="absolute top-4 left-4 right-4 animate-fade-in">
         <div className="flex items-start justify-between">
           {/* Points display - left side */}
-          <Card className="shadow-lg bg-white/95 backdrop-blur-sm min-w-[182px]">
-            <CardContent className="p-3">
+          <Card className={`shadow-lg bg-white/95 backdrop-blur-sm ${isMobile ? 'mobile-card-responsive' : isTablet ? 'tablet-card-responsive' : 'min-w-[182px]'} touch-optimization`}>
+            <CardContent className={`${isMobile ? 'mobile-spacing' : 'p-3'}`}>
               <div className="flex items-center gap-3">
                 <div>
                   <p className="text-xs text-muted-foreground">Turn {currentTurn + 1}/{TURNS_PER_LEVEL}</p>
@@ -273,8 +277,8 @@ const Index = () => {
             : 'scale(1)'
         }}
       >
-        <Card className="shadow-2xl bg-blue-50/95 backdrop-blur-sm w-[182px] h-[72px]">
-          <CardContent className="p-3 h-full flex flex-col justify-center">
+        <Card className={`shadow-2xl bg-blue-50/95 backdrop-blur-sm ${isMobile ? 'mobile-card-responsive' : isTablet ? 'tablet-card-responsive' : 'w-[182px]'} ${isMobile ? 'h-[60px]' : 'h-[72px]'} touch-optimization`}>
+          <CardContent className={`${isMobile ? 'mobile-spacing' : 'p-3'} h-full flex flex-col justify-center`}>
             <div className="flex items-center justify-center flex-1">
               <div className="text-center">
                 <p className="text-xs text-muted-foreground mb-1">Locate this city:</p>
@@ -295,9 +299,9 @@ const Index = () => {
       {gameState === 'PLAYING' && selectedPin && (
         <div className="absolute bottom-4 left-0 right-0 animate-fade-up">
           <div className="flex justify-center">
-            <div className="min-w-[182px]">
-              <Button onClick={handleConfirmGuess} className="w-full text-lg py-6 px-8 shadow-2xl">
-                <Check className="mr-2 h-6 w-6" /> Confirm Guess
+            <div className={isMobile ? 'mobile-card-responsive' : isTablet ? 'tablet-card-responsive' : 'min-w-[182px]'}>
+              <Button onClick={handleConfirmGuess} className={`w-full ${isMobile ? 'text-base py-4 px-6' : 'text-lg py-6 px-8'} shadow-2xl mobile-touch-target touch-optimization`}>
+                <Check className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`} /> Confirm Guess
               </Button>
             </div>
           </div>
@@ -307,8 +311,8 @@ const Index = () => {
       {gameState === 'RESULT' && lastGuessResult && (
         <div className="absolute bottom-4 left-0 right-0 animate-fade-up">
           <div className="flex justify-center">
-            <Card className="min-w-[182px] shadow-2xl bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-3">
+            <Card className={`${isMobile ? 'mobile-card-responsive' : isTablet ? 'tablet-card-responsive' : 'min-w-[182px]'} shadow-2xl bg-white/95 backdrop-blur-sm touch-optimization`}>
+              <CardContent className={`${isMobile ? 'mobile-spacing' : 'p-3'}`}>
                 <div className="text-center">
                  <p className="text-xs font-semibold">You were {Math.round(lastGuessResult.distance)}km off!</p>
                  <p className="text-lg font-bold text-green-600 my-1">+{lastGuessResult.score} points</p>

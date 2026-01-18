@@ -169,4 +169,92 @@
     box-shadow: 0 15px 40px rgba(79, 70, 229, 0.6);
     background: linear-gradient(45deg, #7c3aed, #4f46e5);
   }
+
+  /* Mobile viewport optimizations */
+  @media (max-width: 768px) {
+    /* Ensure full screen on mobile */
+    html, body {
+      height: 100vh;
+      height: 100dvh; /* Dynamic viewport height for mobile browsers */
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+
+    /* Mobile-optimized start screen */
+    .game-start-background {
+      /* Reduced complexity for mobile performance */
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background-size: 200% 200%;
+    }
+
+    /* Adjust title sizing for mobile */
+    h1 {
+      font-size: 3rem !important; /* Smaller title on mobile */
+    }
+
+    /* Better mobile button spacing */
+    .btn-adventure {
+      font-size: 1rem !important;
+      padding: 0.75rem 2rem !important;
+    }
+
+    /* Mobile-friendly card sizing */
+    .mobile-card-responsive {
+      min-width: 160px !important;
+      width: 160px !important;
+    }
+
+    /* Better touch targets for mobile */
+    .mobile-touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Optimize spacing for mobile */
+    .mobile-spacing {
+      padding: 0.5rem !important;
+      margin: 0.25rem !important;
+    }
+  }
+
+  /* Tablet optimizations */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet-optimized title */
+    h1 {
+      font-size: 4rem !important;
+    }
+    
+    /* Slightly smaller cards for tablets */
+    .tablet-card-responsive {
+      min-width: 170px !important;
+      width: 170px !important;
+    }
+  }
+
+  /* Prevent horizontal scrolling on all screen sizes */
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+
+  /* Prevent zoom on input focus (mobile Safari) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Better touch interaction for game elements */
+  .touch-optimization {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
